@@ -13,5 +13,6 @@ rerun = { version = "0.30", default-features = false, features = [
   "sdk",
   "server",
 ] }
+egui_extras = "0.33"
 mimalloc = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }

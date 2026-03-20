@@ -8326,6 +8326,7 @@ dependencies = [
 name = "rewire-viewer"
 version = "0.1.0"
 dependencies = [
+ "egui_extras",
  "mimalloc",
  "rerun",
  "tokio",

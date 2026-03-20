@@ -1,6 +1,8 @@
+mod topics_system;
+mod view_class;
+
 use rerun::external::{
-    eframe, egui, re_crash_handler, re_entity_db, re_grpc_server, re_log, re_log_types, re_memory,
-    re_viewer, tokio,
+    eframe, egui, re_crash_handler, re_grpc_server, re_log, re_memory, re_viewer, tokio,
 };
 
 #[global_allocator]
@@ -39,75 +41,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 None,
                 re_viewer::AsyncRuntimeHandle::from_current_tokio_runtime_or_wasmbindgen()?,
             );
+            rerun_app.add_view_class::<view_class::TopicsView>()?;
             rerun_app.add_log_receiver(rx);
-            Ok(Box::new(RewireApp { rerun_app }))
+            Ok(Box::new(rerun_app))
         }),
     )?;
 
     Ok(())
-}
-
-struct RewireApp {
-    rerun_app: re_viewer::App,
-}
-
-impl eframe::App for RewireApp {
-    fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        self.rerun_app.save(storage);
-    }
-
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        egui::SidePanel::right("rewire_topics")
-            .default_width(250.0)
-            .show(ctx, |ui| {
-                self.topics_panel(ui);
-            });
-
-        self.rerun_app.update(ctx, frame);
-    }
-}
-
-impl RewireApp {
-    fn topics_panel(&self, ui: &mut egui::Ui) {
-        ui.add_space(4.0);
-        ui.vertical_centered(|ui| {
-            ui.strong("Topics");
-        });
-        ui.separator();
-
-        let Some(entity_db) = self.rerun_app.recording_db() else {
-            ui.label("Waiting for data...");
-            return;
-        };
-
-        topics_ui(ui, entity_db);
-    }
-}
-
-fn topics_ui(ui: &mut egui::Ui, entity_db: &re_entity_db::EntityDb) {
-    let timeline = re_log_types::TimelineName::log_time();
-
-    egui::ScrollArea::vertical()
-        .auto_shrink([false, true])
-        .show(ui, |ui| {
-            for entity_path in entity_db.sorted_entity_paths() {
-                let path_str = entity_path.to_string();
-                if path_str.starts_with("/rewire") || path_str.starts_with("/bridge") {
-                    continue;
-                }
-
-                let components: Vec<String> = entity_db
-                    .storage_engine()
-                    .store()
-                    .all_components_on_timeline_sorted(&timeline, &entity_path)
-                    .map(|c| c.iter().map(|c| c.to_string()).collect())
-                    .unwrap_or_default();
-
-                ui.collapsing(&path_str, |ui| {
-                    for component in &components {
-                        ui.label(component);
-                    }
-                });
-            }
-        });
 }
