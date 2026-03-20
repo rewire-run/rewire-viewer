@@ -8328,6 +8328,7 @@ version = "0.1.0"
 dependencies = [
  "egui_extras",
  "mimalloc",
+ "re_types_core",
  "rerun",
  "tokio",
 ]

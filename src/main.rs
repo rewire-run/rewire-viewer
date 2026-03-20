@@ -1,3 +1,4 @@
+pub mod archetype;
 mod topics_system;
 mod view_class;
 

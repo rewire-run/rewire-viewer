@@ -93,24 +93,27 @@ impl ViewClass for TopicsView {
         TableBuilder::new(ui)
             .resizable(true)
             .vscroll(true)
+            .striped(true)
+            .column(Column::auto().at_least(150.0))
             .column(Column::auto().at_least(200.0))
-            .column(Column::remainder())
+            .column(Column::remainder().at_least(60.0))
             .header(20.0, |mut header| {
-                header.col(|ui| {
-                    ui.strong("Topic");
-                });
-                header.col(|ui| {
-                    ui.strong("Archetype");
-                });
+                header.col(|ui| { ui.strong("Topic"); });
+                header.col(|ui| { ui.strong("Type"); });
+                header.col(|ui| { ui.strong("Status"); });
             })
             .body(|body| {
                 body.rows(20.0, topics.entries.len(), |mut row| {
                     let entry = &topics.entries[row.index()];
+                    row.col(|ui| { ui.label(&entry.topic_name); });
+                    row.col(|ui| { ui.label(&entry.type_name); });
                     row.col(|ui| {
-                        ui.label(entry.entity_path.to_string());
-                    });
-                    row.col(|ui| {
-                        ui.label(entry.components.join(", "));
+                        let color = match entry.status.as_str() {
+                            "active" => egui::Color32::GREEN,
+                            "inactive" => egui::Color32::GRAY,
+                            _ => egui::Color32::YELLOW,
+                        };
+                        ui.colored_label(color, &entry.status);
                     });
                 });
             });
