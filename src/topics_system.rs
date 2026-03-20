@@ -40,7 +40,9 @@ impl VisualizerSystem for TopicsSystem {
         &self,
         _app_options: &re_viewer_context::AppOptions,
     ) -> VisualizerQueryInfo {
-        VisualizerQueryInfo::empty()
+        let mut info = VisualizerQueryInfo::empty();
+        info.queried.insert(ROS2TopicInfo::descriptor_topic_name());
+        info
     }
 
     fn execute(
