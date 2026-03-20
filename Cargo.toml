@@ -1,0 +1,17 @@
+[package]
+name = "rewire-viewer"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "rewire-viewer"
+path = "src/main.rs"
+
+[dependencies]
+rerun = { version = "0.30", default-features = false, features = [
+  "native_viewer",
+  "sdk",
+  "server",
+] }
+mimalloc = "0.1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
