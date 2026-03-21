@@ -4,3 +4,4 @@
 /web/*.wasm
 /web/*.js
 /web/*.d.ts
+*.rrd

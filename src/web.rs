@@ -21,7 +21,11 @@ impl RewireWebHandle {
     }
 
     #[wasm_bindgen]
-    pub async fn start(&self, canvas: web_sys::HtmlCanvasElement) -> Result<(), JsValue> {
+    pub async fn start(
+        &self,
+        canvas: web_sys::HtmlCanvasElement,
+        url: Option<String>,
+    ) -> Result<(), JsValue> {
         let web_options = eframe::WebOptions::default();
 
         self.runner
@@ -42,6 +46,11 @@ impl RewireWebHandle {
                     rerun_app.add_view_class::<views::TopicsView>()?;
                     rerun_app.add_view_class::<views::NodesView>()?;
                     rerun_app.add_view_class::<views::DiagnosticsView>()?;
+
+                    if let Some(rrd_url) = &url {
+                        rerun_app.open_url_or_file(rrd_url);
+                    }
+
                     Ok(Box::new(RewireApp::new(rerun_app)))
                 }),
             )

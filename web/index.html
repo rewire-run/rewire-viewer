@@ -121,7 +121,9 @@
         await init(wasmBytes);
 
         const handle = new RewireWebHandle();
-        await handle.start(canvas);
+        const params = new URLSearchParams(window.location.search);
+        const rrdUrl = params.get("url") || undefined;
+        await handle.start(canvas, rrdUrl);
 
         loading.classList.add("hidden");
         canvas.classList.remove("hidden");
