@@ -19,6 +19,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     re_log::setup_logging();
     re_crash_handler::install_crash_handlers(re_viewer::build_info());
 
+    tokio::spawn(serve_info_api());
+
     let rx = re_grpc_server::spawn_with_recv(
         "0.0.0.0:9876".parse()?,
         Default::default(),
@@ -213,6 +215,21 @@ fn node_count(entity_db: &re_entity_db::EntityDb) -> usize {
             arr.len()
         })
         .unwrap_or(0)
+}
+
+async fn serve_info_api() {
+    let app = axum::Router::new().route(
+        "/api/info",
+        axum::routing::get(|| async {
+            axum::Json(serde_json::json!({
+                "viewer": "rewire",
+                "version": env!("CARGO_PKG_VERSION"),
+            }))
+        }),
+    );
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:9877").await.unwrap();
+    re_log::info!("Listening for HTTP connections on http://0.0.0.0:9877");
+    axum::serve(listener, app).await.unwrap();
 }
 
 fn topic_count(entity_db: &re_entity_db::EntityDb) -> usize {

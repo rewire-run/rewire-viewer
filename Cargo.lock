@@ -8689,11 +8689,13 @@ dependencies = [
 name = "rewire-viewer"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "egui_extras",
  "mimalloc",
  "re_types_core",
  "rerun",
  "rewire-extras",
+ "serde_json",
  "tokio",
 ]
 
