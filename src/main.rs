@@ -173,9 +173,12 @@ fn check_heartbeats(entity_db: &re_entity_db::EntityDb) -> (bool, usize) {
             .latest_at(&query, entity_path, []);
 
         let (time, _) = results.max_index();
-        let age_secs = (now_nanos - time.as_i64()) / 1_000_000_000;
-        if age_secs < 5 {
-            alive_count += 1;
+        let heartbeat_nanos = time.as_i64();
+        if heartbeat_nanos > 0 && now_nanos > heartbeat_nanos {
+            let age_secs = (now_nanos - heartbeat_nanos) / 1_000_000_000;
+            if age_secs < 5 {
+                alive_count += 1;
+            }
         }
     }
 
