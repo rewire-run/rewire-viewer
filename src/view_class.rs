@@ -107,8 +107,7 @@ impl ViewClass for TopicsView {
             .column(Column::auto().at_least(160.0).clip(true))
             .column(Column::auto().at_least(180.0).clip(true))
             .column(Column::auto().at_least(40.0))
-            .column(Column::auto().at_least(40.0))
-            .column(Column::remainder().at_least(70.0))
+            .column(Column::remainder().at_least(40.0))
             .header(header_height, |mut header| {
                 header.col(|ui| {
                     ui.add_space(8.0);
@@ -125,10 +124,6 @@ impl ViewClass for TopicsView {
                 header.col(|ui| {
                     ui.add_space(8.0);
                     ui.strong("Subs");
-                });
-                header.col(|ui| {
-                    ui.add_space(8.0);
-                    ui.strong("Status");
                 });
             })
             .body(|body| {
@@ -154,16 +149,6 @@ impl ViewClass for TopicsView {
                     row.col(|ui| {
                         ui.add_space(8.0);
                         ui.label(entry.subscribers.to_string());
-                    });
-                    row.col(|ui| {
-                        ui.add_space(8.0);
-                        let (color, icon) = match entry.status.as_str() {
-                            "active" => (egui::Color32::from_rgb(80, 200, 120), "⬤"),
-                            "inactive" => (egui::Color32::from_gray(120), "⬤"),
-                            _ => (egui::Color32::YELLOW, "⬤"),
-                        };
-                        ui.colored_label(color, icon);
-                        ui.label(&entry.status);
                     });
                 });
             });
