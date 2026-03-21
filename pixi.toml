@@ -1,0 +1,21 @@
+[workspace]
+name = "rewire-viewer"
+platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
+channels = ["conda-forge"]
+
+[dependencies]
+
+[tasks]
+check = "cargo check"
+fmt = "cargo fmt"
+lint = "cargo clippy --all-features --all-targets -- -D warnings"
+test = "cargo test"
+sanity = { depends-on = ["check", "fmt", "lint", "test"] }
+build = "cargo build --release"
+
+[feature.dev.dependencies]
+rust = ">=1.82"
+rerun-sdk = ">=0.30"
+
+[environments]
+default = { features = ["dev"] }
