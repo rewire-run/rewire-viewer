@@ -81,39 +81,71 @@ impl ViewClass for TopicsView {
     ) -> Result<(), ViewSystemExecutionError> {
         let topics = system_output.view_systems.get::<TopicsSystem>()?;
 
+        ui.add_space(4.0);
+
         if topics.entries.is_empty() {
-            ui.centered_and_justified(|ui| {
-                ui.label("No topics yet");
+            ui.vertical_centered(|ui| {
+                ui.add_space(20.0);
+                ui.label(
+                    egui::RichText::new("No topics yet")
+                        .color(egui::Color32::from_gray(120)),
+                );
             });
             return Ok(());
         }
 
         use egui_extras::{Column, TableBuilder};
 
+        let row_height = 24.0;
+        let header_height = 28.0;
+
         TableBuilder::new(ui)
             .resizable(true)
             .vscroll(true)
             .striped(true)
-            .column(Column::auto().at_least(150.0))
-            .column(Column::auto().at_least(200.0))
-            .column(Column::remainder().at_least(60.0))
-            .header(20.0, |mut header| {
-                header.col(|ui| { ui.strong("Topic"); });
-                header.col(|ui| { ui.strong("Type"); });
-                header.col(|ui| { ui.strong("Status"); });
+            .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
+            .column(Column::auto().at_least(160.0).clip(true))
+            .column(Column::auto().at_least(200.0).clip(true))
+            .column(Column::remainder().at_least(70.0))
+            .header(header_height, |mut header| {
+                header.col(|ui| {
+                    ui.add_space(8.0);
+                    ui.strong("Topic");
+                });
+                header.col(|ui| {
+                    ui.add_space(8.0);
+                    ui.strong("Type");
+                });
+                header.col(|ui| {
+                    ui.add_space(8.0);
+                    ui.strong("Status");
+                });
             })
             .body(|body| {
-                body.rows(20.0, topics.entries.len(), |mut row| {
+                body.rows(row_height, topics.entries.len(), |mut row| {
                     let entry = &topics.entries[row.index()];
-                    row.col(|ui| { ui.label(&entry.topic_name); });
-                    row.col(|ui| { ui.label(&entry.type_name); });
                     row.col(|ui| {
-                        let color = match entry.status.as_str() {
-                            "active" => egui::Color32::GREEN,
-                            "inactive" => egui::Color32::GRAY,
-                            _ => egui::Color32::YELLOW,
+                        ui.add_space(8.0);
+                        ui.label(
+                            egui::RichText::new(&entry.topic_name).monospace(),
+                        );
+                    });
+                    row.col(|ui| {
+                        ui.add_space(8.0);
+                        ui.label(
+                            egui::RichText::new(&entry.type_name)
+                                .color(egui::Color32::from_gray(180)),
+                        );
+                    });
+                    row.col(|ui| {
+                        ui.add_space(8.0);
+                        let (color, icon) = match entry.status.as_str() {
+                            "active" => (egui::Color32::from_rgb(80, 200, 120), "⬤"),
+                            "inactive" => (egui::Color32::from_gray(120), "⬤"),
+                            _ => (egui::Color32::YELLOW, "⬤"),
                         };
-                        ui.colored_label(color, &entry.status);
+                        ui.colored_label(color, icon);
+                        ui.label(&entry.status);
                     });
                 });
             });
