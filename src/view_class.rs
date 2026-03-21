@@ -96,59 +96,39 @@ impl ViewClass for TopicsView {
 
         use egui_extras::{Column, TableBuilder};
 
-        let row_height = 24.0;
-        let header_height = 28.0;
-
         TableBuilder::new(ui)
             .resizable(true)
             .vscroll(true)
             .striped(true)
             .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
-            .column(Column::auto().at_least(160.0).clip(true))
-            .column(Column::auto().at_least(180.0).clip(true))
-            .column(Column::auto().at_least(40.0))
-            .column(Column::remainder().at_least(40.0))
-            .header(header_height, |mut header| {
-                header.col(|ui| {
-                    ui.add_space(8.0);
-                    ui.strong("Topic");
-                });
-                header.col(|ui| {
-                    ui.add_space(8.0);
-                    ui.strong("Type");
-                });
-                header.col(|ui| {
-                    ui.add_space(8.0);
-                    ui.strong("Pubs");
-                });
-                header.col(|ui| {
-                    ui.add_space(8.0);
-                    ui.strong("Subs");
-                });
+            .column(Column::auto().at_least(120.0).clip(true))
+            .column(Column::auto().at_least(140.0).clip(true))
+            .column(Column::auto().at_least(30.0))
+            .column(Column::remainder().at_least(30.0))
+            .header(20.0, |mut header| {
+                header.col(|ui| { ui.strong("Topic"); });
+                header.col(|ui| { ui.strong("Type"); });
+                header.col(|ui| { ui.strong("Pubs"); });
+                header.col(|ui| { ui.strong("Subs"); });
             })
             .body(|body| {
-                body.rows(row_height, topics.entries.len(), |mut row| {
+                body.rows(18.0, topics.entries.len(), |mut row| {
                     let entry = &topics.entries[row.index()];
                     row.col(|ui| {
-                        ui.add_space(8.0);
-                        ui.label(
-                            egui::RichText::new(&entry.topic_name).monospace(),
-                        );
+                        ui.label(egui::RichText::new(&entry.topic_name).monospace().small());
                     });
                     row.col(|ui| {
-                        ui.add_space(8.0);
                         ui.label(
                             egui::RichText::new(&entry.type_name)
-                                .color(egui::Color32::from_gray(180)),
+                                .small()
+                                .color(egui::Color32::from_gray(160)),
                         );
                     });
                     row.col(|ui| {
-                        ui.add_space(8.0);
-                        ui.label(entry.publishers.to_string());
+                        ui.label(egui::RichText::new(entry.publishers.to_string()).small());
                     });
                     row.col(|ui| {
-                        ui.add_space(8.0);
-                        ui.label(entry.subscribers.to_string());
+                        ui.label(egui::RichText::new(entry.subscribers.to_string()).small());
                     });
                 });
             });
