@@ -1,5 +1,5 @@
 mod app;
-mod http;
+mod grpc;
 mod ui;
 mod util;
 mod views;
@@ -34,7 +34,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     re_crash_handler::install_crash_handlers(re_viewer::build_info());
 
     let tracker = Arc::new(Mutex::new(HeartbeatTracker::default()));
-    tokio::spawn(http::serve(tracker.clone()));
+    tokio::spawn(grpc::serve(tracker.clone()));
 
     let rx = re_grpc_server::spawn_with_recv(
         "0.0.0.0:9876".parse()?,

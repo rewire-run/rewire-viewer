@@ -8679,26 +8679,27 @@ dependencies = [
 
 [[package]]
 name = "rewire-extras"
-version = "0.1.1"
-source = "git+https://github.com/rewire-run/rewire-extras?tag=v0.1.1#6fcc64c7f07675c07d851784c6c30a9040057346"
+version = "0.1.2"
 dependencies = [
+ "prost",
  "re_types_core",
  "rerun",
+ "tonic",
+ "tonic-prost",
 ]
 
 [[package]]
 name = "rewire-viewer"
 version = "0.1.0"
 dependencies = [
- "axum",
  "clap",
  "egui_extras",
  "mimalloc",
  "re_types_core",
  "rerun",
  "rewire-extras",
- "serde_json",
  "tokio",
+ "tonic",
 ]
 
 [[package]]
