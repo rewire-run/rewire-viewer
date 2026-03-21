@@ -3,6 +3,10 @@ name = "rewire-viewer"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
+description = "Custom Rerun viewer for ROS 2 visualization with topic and node introspection"
+keywords = ["ros2", "rerun", "robotics", "visualization", "rewire"]
+categories = ["science::robotics", "visualization"]
+repository = "https://github.com/rewire-run/rewire-viewer"
 
 [[bin]]
 name = "rewire-viewer"
