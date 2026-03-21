@@ -68,9 +68,46 @@ jobs:
           name: rewire-viewer-${{ matrix.target }}
           path: ${{ env.ARCHIVE }}
 
+  build-wasm:
+    name: build-wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@0.2.100
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: wasm32
+
+      - name: Build WASM
+        env:
+          AR_wasm32_unknown_unknown: llvm-ar
+          CC_wasm32_unknown_unknown: clang
+        run: cargo build --lib --target wasm32-unknown-unknown --release --no-default-features
+
+      - name: Generate JS bindings
+        run: |
+          wasm-bindgen target/wasm32-unknown-unknown/release/rewire_viewer.wasm \
+            --target web --out-dir web/
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rewire-viewer-wasm
+          path: |
+            web/index.html
+            web/rewire_viewer.js
+            web/rewire_viewer_bg.wasm
+
   release:
     name: github-release
-    needs: build
+    needs: [build, build-wasm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -95,3 +132,25 @@ jobs:
           body: ${{ steps.changelog.outputs.content }}
           files: artifacts/*
           generate_release_notes: false
+
+  deploy-wasm:
+    name: deploy-wasm
+    needs: [build-wasm, release]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: rewire-viewer-wasm
+          path: web
+
+      - name: Install wrangler
+        run: npm install -g wrangler
+
+      - name: Upload to R2
+        run: |
+          wrangler r2 object put rewire-viewer/index.html --file web/index.html --content-type "text/html" --remote
+          wrangler r2 object put rewire-viewer/rewire_viewer.js --file web/rewire_viewer.js --content-type "application/javascript" --remote
+          wrangler r2 object put rewire-viewer/rewire_viewer_bg.wasm --file web/rewire_viewer_bg.wasm --content-type "application/wasm" --remote
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
