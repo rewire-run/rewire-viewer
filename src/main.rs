@@ -1,12 +1,6 @@
 use std::sync::{Arc, Mutex};
 
 use clap::Parser;
-use eframe;
-use re_crash_handler;
-use re_grpc_server;
-use re_memory;
-use re_viewer;
-use tokio;
 use rewire_extras::HeartbeatTracker;
 use rewire_viewer::{app, grpc, views};
 
