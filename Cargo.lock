@@ -6255,7 +6255,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -8679,8 +8679,8 @@ dependencies = [
 
 [[package]]
 name = "rewire-extras"
-version = "0.1.0"
-source = "git+https://github.com/rewire-run/rewire-extras?tag=v0.1.0#dd9293b466529960cc308569a2964589187db277"
+version = "0.1.1"
+source = "git+https://github.com/rewire-run/rewire-extras?tag=v0.1.1#6fcc64c7f07675c07d851784c6c30a9040057346"
 dependencies = [
  "re_types_core",
  "rerun",

@@ -50,6 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             );
             rerun_app.add_view_class::<views::TopicsView>()?;
             rerun_app.add_view_class::<views::NodesView>()?;
+            rerun_app.add_view_class::<views::DiagnosticsView>()?;
             rerun_app.add_log_receiver(rx);
             Ok(Box::new(app::RewireApp::new(rerun_app, tracker.clone())))
         }),
