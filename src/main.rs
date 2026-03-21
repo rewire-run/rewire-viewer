@@ -6,15 +6,29 @@ mod views;
 
 use std::sync::{Arc, Mutex};
 
+use clap::Parser;
 use rerun::external::{eframe, re_crash_handler, re_grpc_server, re_memory, re_viewer, tokio};
 use rewire_extras::HeartbeatTracker;
+
+/// Rewire viewer based on Rerun API for bridge introspection.
+#[derive(Parser)]
+#[command(name = "rewire-viewer", version)]
+struct Cli {}
 
 #[global_allocator]
 static GLOBAL: re_memory::AccountingAllocator<mimalloc::MiMalloc> =
     re_memory::AccountingAllocator::new(mimalloc::MiMalloc);
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    Cli::parse();
+
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?
+        .block_on(run())
+}
+
+async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let main_thread_token = re_viewer::MainThreadToken::i_promise_i_am_on_the_main_thread();
     rerun::external::re_log::setup_logging();
     re_crash_handler::install_crash_handlers(re_viewer::build_info());
