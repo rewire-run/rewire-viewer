@@ -1,6 +1,7 @@
 use rerun::external::{
     egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context,
 };
+use re_ui::UiExt as _;
 
 use re_log_types::EntityPath;
 use re_sdk_types::ViewClassIdentifier;
@@ -96,40 +97,32 @@ impl ViewClass for TopicsView {
 
         use egui_extras::{Column, TableBuilder};
 
+        let tokens = ui.tokens();
+        let row_height = tokens.table_row_height(re_ui::TableStyle::Dense);
+
         TableBuilder::new(ui)
             .resizable(true)
             .vscroll(true)
-            .striped(true)
-            .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
+            .max_scroll_height(f32::INFINITY)
+            .column(Column::auto().at_least(100.0).clip(true))
             .column(Column::auto().at_least(120.0).clip(true))
-            .column(Column::auto().at_least(140.0).clip(true))
             .column(Column::auto().at_least(30.0))
             .column(Column::remainder().at_least(30.0))
-            .header(20.0, |mut header| {
-                header.col(|ui| { ui.strong("Topic"); });
-                header.col(|ui| { ui.strong("Type"); });
-                header.col(|ui| { ui.strong("Pubs"); });
-                header.col(|ui| { ui.strong("Subs"); });
+            .header(tokens.deprecated_table_header_height(), |mut header| {
+                re_ui::DesignTokens::setup_table_header(&mut header);
+                header.col(|ui| { ui.label("Topic"); });
+                header.col(|ui| { ui.label("Type"); });
+                header.col(|ui| { ui.label("Pubs"); });
+                header.col(|ui| { ui.label("Subs"); });
             })
-            .body(|body| {
-                body.rows(18.0, topics.entries.len(), |mut row| {
+            .body(|mut body| {
+                tokens.setup_table_body(&mut body, re_ui::TableStyle::Dense);
+                body.rows(row_height, topics.entries.len(), |mut row| {
                     let entry = &topics.entries[row.index()];
-                    row.col(|ui| {
-                        ui.label(egui::RichText::new(&entry.topic_name).monospace().small());
-                    });
-                    row.col(|ui| {
-                        ui.label(
-                            egui::RichText::new(&entry.type_name)
-                                .small()
-                                .color(egui::Color32::from_gray(160)),
-                        );
-                    });
-                    row.col(|ui| {
-                        ui.label(egui::RichText::new(entry.publishers.to_string()).small());
-                    });
-                    row.col(|ui| {
-                        ui.label(egui::RichText::new(entry.subscribers.to_string()).small());
-                    });
+                    row.col(|ui| { ui.label(&entry.topic_name); });
+                    row.col(|ui| { ui.label(&entry.type_name); });
+                    row.col(|ui| { ui.label(entry.publishers.to_string()); });
+                    row.col(|ui| { ui.label(entry.subscribers.to_string()); });
                 });
             });
 
