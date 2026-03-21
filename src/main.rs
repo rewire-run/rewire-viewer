@@ -148,11 +148,12 @@ fn status_bar_ui(
 }
 
 fn check_heartbeats(entity_db: &re_entity_db::EntityDb) -> (bool, usize) {
-    let timeline = re_log_types::TimelineName::new("wall_time");
     let now_nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_nanos() as i64;
+
+    let timeline = re_log_types::TimelineName::new("wall_time");
 
     let mut alive_count = 0;
     let paths: Vec<re_log_types::EntityPath> = entity_db
@@ -171,6 +172,10 @@ fn check_heartbeats(entity_db: &re_entity_db::EntityDb) -> (bool, usize) {
             .storage_engine()
             .cache()
             .latest_at(&query, entity_path, []);
+
+        if results.is_empty() {
+            continue;
+        }
 
         let (time, _) = results.max_index();
         let heartbeat_nanos = time.as_i64();
