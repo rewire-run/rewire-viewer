@@ -109,13 +109,16 @@ fn status_bar(
 
         if connected {
             ui.colored_label(egui::Color32::from_rgb(80, 200, 120), "⬤");
-            let suffix = if bridge_count == 1 { "" } else { "s" };
-            ui.label(format!("Connected ({bridge_count} bridge{suffix})"));
+            ui.label("Connected");
         } else {
             ui.colored_label(egui::Color32::from_rgb(200, 80, 80), "⬤");
             ui.label("Disconnected");
         }
 
+        ui.separator();
+
+        let suffix = if bridge_count == 1 { "" } else { "s" };
+        ui.label(format!("{bridge_count} bridge{suffix}"));
         ui.separator();
 
         if !app_id.is_empty() {
