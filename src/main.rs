@@ -7,7 +7,9 @@ use rerun::external::{
     arrow, eframe, egui, re_chunk_store, re_crash_handler, re_entity_db, re_grpc_server, re_log,
     re_log_types, re_memory, re_viewer, tokio,
 };
-use rewire_extras::{ROS2NodeInfo, ROS2TopicInfo};
+use std::sync::{Arc, Mutex};
+
+use rewire_extras::{HeartbeatTracker, ROS2NodeInfo, ROS2TopicInfo};
 
 #[global_allocator]
 static GLOBAL: re_memory::AccountingAllocator<mimalloc::MiMalloc> =
@@ -19,7 +21,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     re_log::setup_logging();
     re_crash_handler::install_crash_handlers(re_viewer::build_info());
 
-    tokio::spawn(serve_info_api());
+    let tracker = Arc::new(Mutex::new(HeartbeatTracker::default()));
+    tokio::spawn(serve_api(tracker.clone()));
 
     let rx = re_grpc_server::spawn_with_recv(
         "0.0.0.0:9876".parse()?,
@@ -53,6 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Ok(Box::new(RewireApp {
                 rerun_app,
                 start_time: std::time::Instant::now(),
+                tracker: tracker.clone(),
             }))
         }),
     )?;
@@ -63,6 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 struct RewireApp {
     rerun_app: re_viewer::App,
     start_time: std::time::Instant,
+    tracker: Arc<Mutex<HeartbeatTracker>>,
 }
 
 impl eframe::App for RewireApp {
@@ -74,7 +79,7 @@ impl eframe::App for RewireApp {
         ctx.request_repaint_after(std::time::Duration::from_secs(1));
 
         let db = self.rerun_app.recording_db();
-        let (connected, bridge_count) = db.map(check_heartbeats).unwrap_or((false, 0));
+        let (connected, bridge_count) = self.tracker.lock().unwrap().status();
         let status = StatusBarState {
             has_db: db.is_some(),
             connected,
@@ -158,47 +163,6 @@ fn status_bar(ui: &mut egui::Ui, s: &StatusBarState) {
     });
 }
 
-const HEARTBEAT_STALENESS_SECS: i64 = 5;
-
-fn check_heartbeats(entity_db: &re_entity_db::EntityDb) -> (bool, usize) {
-    let now_nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos() as i64;
-    let timeline = re_log_types::TimelineName::log_time();
-    let scalars_id = rerun::Scalars::descriptor_scalars().component;
-
-    let paths: Vec<re_log_types::EntityPath> =
-        entity_db.sorted_entity_paths().cloned().collect();
-
-    let alive = paths
-        .iter()
-        .filter(|p| {
-            let s = format!("{p}");
-            s.starts_with("/rewire/bridge/") && s.ends_with("/heartbeat")
-        })
-        .filter(|p| {
-            let query = re_chunk_store::LatestAtQuery::latest(timeline);
-            let results = entity_db
-                .storage_engine()
-                .cache()
-                .latest_at(&query, p, [scalars_id]);
-
-            if results.is_empty() {
-                return false;
-            }
-
-            let (time, _) = results.max_index();
-            let nanos = time.as_i64();
-            nanos > 0
-                && now_nanos > nanos
-                && (now_nanos - nanos) / 1_000_000_000 < HEARTBEAT_STALENESS_SECS
-        })
-        .count();
-
-    (alive > 0, alive)
-}
-
 fn node_count(entity_db: &re_entity_db::EntityDb) -> usize {
     let timeline = re_log_types::TimelineName::log_time();
     let query = re_chunk_store::LatestAtQuery::latest(timeline);
@@ -217,16 +181,30 @@ fn node_count(entity_db: &re_entity_db::EntityDb) -> usize {
         .unwrap_or(0)
 }
 
-async fn serve_info_api() {
-    let app = axum::Router::new().route(
-        "/api/info",
-        axum::routing::get(|| async {
-            axum::Json(serde_json::json!({
-                "viewer": "rewire",
-                "version": env!("CARGO_PKG_VERSION"),
-            }))
-        }),
-    );
+async fn serve_api(tracker: Arc<Mutex<HeartbeatTracker>>) {
+    let app = axum::Router::new()
+        .route(
+            "/api/info",
+            axum::routing::get(|| async {
+                axum::Json(serde_json::json!({
+                    "viewer": "rewire",
+                    "version": env!("CARGO_PKG_VERSION"),
+                }))
+            }),
+        )
+        .route(
+            "/api/heartbeat/{id}",
+            axum::routing::post({
+                let tracker = tracker.clone();
+                move |axum::extract::Path(id): axum::extract::Path<String>| {
+                    let tracker = tracker.clone();
+                    async move {
+                        tracker.lock().unwrap().beat(&id);
+                        axum::http::StatusCode::NO_CONTENT
+                    }
+                }
+            }),
+        );
     let listener = tokio::net::TcpListener::bind("0.0.0.0:9877").await.unwrap();
     re_log::info!("Listening for HTTP connections on http://0.0.0.0:9877");
     axum::serve(listener, app).await.unwrap();
