@@ -39,7 +39,7 @@ impl RewireService for RewireServiceImpl {
 pub async fn serve(tracker: Arc<Mutex<HeartbeatTracker>>) {
     let svc = RewireServiceImpl { tracker };
     let addr = "0.0.0.0:9877".parse().unwrap();
-    re_log::info!("Listening for gRPC connections on http://0.0.0.0:9877");
+    re_log::info!("Listening for gRPC connections on 0.0.0.0:9877. Used by bridges to advertise themselves and query viewer info.");
     tonic::transport::Server::builder()
         .add_service(RewireServiceServer::new(svc))
         .serve(addr)
