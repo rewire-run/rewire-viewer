@@ -23,8 +23,8 @@ lint = "cargo clippy --all-features --all-targets -- -D warnings"
 test = "cargo test"
 sanity = { depends-on = ["check", "fmt", "lint", "test"] }
 build = "cargo build --release"
-build-wasm = "cargo build --lib --target wasm32-unknown-unknown --release --no-default-features"
-check-wasm = "cargo check --lib --target wasm32-unknown-unknown --no-default-features"
+build-wasm = { cmd = "cargo build --lib --target wasm32-unknown-unknown --release --no-default-features", env = { AR_wasm32_unknown_unknown = "llvm-ar", CC_wasm32_unknown_unknown = "clang" } }
+check-wasm = { cmd = "cargo check --lib --target wasm32-unknown-unknown --no-default-features", env = { AR_wasm32_unknown_unknown = "llvm-ar", CC_wasm32_unknown_unknown = "clang" } }
 
 [feature.dev.dependencies]
 rust = ">=1.82"

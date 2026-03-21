@@ -53,6 +53,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 eframe = { version = "0.33", default-features = false, features = ["wgpu"] }
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
+web-time = "1"
 web-sys = { version = "0.3.77", features = [
   "DomException",
   "EncodedVideoChunk",

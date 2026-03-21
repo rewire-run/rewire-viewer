@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Rewire Viewer</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #1a1a1a;
+      color: #ccc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    #loading h2 { margin-bottom: 8px; }
+    #loading .progress {
+      width: 300px;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #loading .progress-bar {
+      height: 100%;
+      background: #003DA1;
+      width: 0%;
+      transition: width 0.2s;
+    }
+    #the_canvas_id {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .hidden { display: none !important; }
+    #error {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #e44;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <h2>Rewire Viewer</h2>
+    <p id="status">Loading...</p>
+    <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+  </div>
+  <canvas id="the_canvas_id" class="hidden"></canvas>
+  <div id="error" class="hidden"></div>
+
+  <script type="module">
+    const loading = document.getElementById("loading");
+    const status = document.getElementById("status");
+    const progressBar = document.getElementById("progress-bar");
+    const canvas = document.getElementById("the_canvas_id");
+    const errorDiv = document.getElementById("error");
+
+    async function main() {
+      try {
+        status.textContent = "Loading module...";
+
+        // Fetch and patch the JS glue to replace bare "env" import with inline shim
+        const jsResponse = await fetch("./rewire_viewer.js");
+        let jsText = await jsResponse.text();
+        jsText = jsText.replace(
+          `import * as __wbg_star0 from 'env';`,
+          `const __wbg_star0 = new Proxy({}, { get(_, prop) { return () => 0; } });`
+        );
+        const blob = new Blob([jsText], { type: "application/javascript" });
+        const blobUrl = URL.createObjectURL(blob);
+        const module = await import(blobUrl);
+        URL.revokeObjectURL(blobUrl);
+        const init = module.default;
+        const RewireWebHandle = module.RewireWebHandle;
+
+        status.textContent = "Downloading viewer...";
+        const wasmResponse = await fetch("./rewire_viewer_bg.wasm");
+        const contentLength = wasmResponse.headers.get("content-length");
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        let loaded = 0;
+
+        const reader = wasmResponse.body.getReader();
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          if (total > 0) {
+            const pct = Math.round((loaded / total) * 100);
+            progressBar.style.width = pct + "%";
+            status.textContent = `Downloading viewer... ${pct}%`;
+          }
+        }
+
+        const wasmBytes = new Uint8Array(loaded);
+        let offset = 0;
+        for (const chunk of chunks) {
+          wasmBytes.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        status.textContent = "Initializing...";
+        progressBar.style.width = "100%";
+        await init(wasmBytes);
+
+        const handle = new RewireWebHandle();
+        await handle.start(canvas);
+
+        loading.classList.add("hidden");
+        canvas.classList.remove("hidden");
+
+        function checkPanic() {
+          if (handle.has_panicked()) {
+            errorDiv.textContent = "Viewer crashed: " + (handle.panic_message() || "unknown error");
+            errorDiv.classList.remove("hidden");
+            canvas.classList.add("hidden");
+          } else {
+            requestAnimationFrame(checkPanic);
+          }
+        }
+        checkPanic();
+      } catch (e) {
+        console.error(e);
+        errorDiv.textContent = "Failed to load viewer: " + e;
+        errorDiv.classList.remove("hidden");
+        loading.classList.add("hidden");
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>

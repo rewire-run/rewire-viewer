@@ -9,4 +9,4 @@ pub mod views;
 mod web;
 
 #[cfg(target_arch = "wasm32")]
-pub use web::WebHandle;
+pub use web::RewireWebHandle;

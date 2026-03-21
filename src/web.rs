@@ -6,14 +6,14 @@ use re_viewer;
 use crate::{app::RewireApp, views};
 
 #[wasm_bindgen]
-pub struct WebHandle {
+pub struct RewireWebHandle {
     runner: eframe::WebRunner,
 }
 
 #[wasm_bindgen]
-impl WebHandle {
+impl RewireWebHandle {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Result<WebHandle, JsValue> {
+    pub fn new() -> Result<RewireWebHandle, JsValue> {
         eframe::WebLogger::init(re_log::LevelFilter::Debug).ok();
         Ok(Self {
             runner: eframe::WebRunner::new(),

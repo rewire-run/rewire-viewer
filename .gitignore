@@ -1,3 +1,6 @@
 /target
 .pixi
 *.conda
+/web/*.wasm
+/web/*.js
+/web/*.d.ts
