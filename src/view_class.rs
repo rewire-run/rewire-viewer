@@ -7,7 +7,8 @@ use re_log_types::EntityPath;
 use re_sdk_types::ViewClassIdentifier;
 use re_viewer_context::{
     SystemExecutionOutput, ViewClass, ViewClassLayoutPriority, ViewClassRegistryError, ViewQuery,
-    ViewSpawnHeuristics, ViewState, ViewSystemExecutionError, ViewSystemRegistrator, ViewerContext,
+    ViewSpawnHeuristics, ViewState, ViewStateExt as _, ViewSystemExecutionError,
+    ViewSystemRegistrator, ViewerContext,
 };
 
 use crate::topics_system::TopicsSystem;
@@ -15,8 +16,27 @@ use crate::topics_system::TopicsSystem;
 #[derive(Default)]
 pub struct TopicsView;
 
-#[derive(Default)]
-struct TopicsViewState;
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum SortColumn {
+    Topic,
+    Type,
+    Pubs,
+    Subs,
+}
+
+struct TopicsViewState {
+    sort_column: SortColumn,
+    ascending: bool,
+}
+
+impl Default for TopicsViewState {
+    fn default() -> Self {
+        Self {
+            sort_column: SortColumn::Topic,
+            ascending: true,
+        }
+    }
+}
 
 impl ViewState for TopicsViewState {
     fn as_any(&self) -> &dyn std::any::Any {
@@ -76,11 +96,12 @@ impl ViewClass for TopicsView {
         _ctx: &ViewerContext<'_>,
         _missing_chunk_reporter: &re_chunk_store::MissingChunkReporter,
         ui: &mut egui::Ui,
-        _state: &mut dyn ViewState,
+        state: &mut dyn ViewState,
         _query: &ViewQuery<'_>,
         system_output: SystemExecutionOutput,
     ) -> Result<(), ViewSystemExecutionError> {
         let tokens = ui.tokens();
+        let state = state.downcast_mut::<TopicsViewState>()?;
         let topics = system_output.view_systems.get::<TopicsSystem>()?;
 
         if topics.entries.is_empty() {
@@ -91,10 +112,25 @@ impl ViewClass for TopicsView {
             return Ok(());
         }
 
+        let mut sorted: Vec<&crate::topics_system::TopicEntry> = topics.entries.iter().collect();
+        match state.sort_column {
+            SortColumn::Topic => sorted.sort_by(|a, b| a.topic_name.cmp(&b.topic_name)),
+            SortColumn::Type => sorted.sort_by(|a, b| a.type_name.cmp(&b.type_name)),
+            SortColumn::Pubs => sorted.sort_by(|a, b| a.publishers.cmp(&b.publishers)),
+            SortColumn::Subs => sorted.sort_by(|a, b| a.subscribers.cmp(&b.subscribers)),
+        }
+        if !state.ascending {
+            sorted.reverse();
+        }
+
         use egui_extras::Column;
 
         let table_style = re_ui::TableStyle::Dense;
         let row_height = tokens.table_row_height(table_style);
+        let sort_col = state.sort_column;
+        let sort_asc = state.ascending;
+
+        let mut clicked_col: Option<SortColumn> = None;
 
         egui::Frame {
             inner_margin: tokens.view_padding().into(),
@@ -114,15 +150,33 @@ impl ViewClass for TopicsView {
                 .column(Column::remainder().at_least(30.0))
                 .header(tokens.deprecated_table_header_height(), |mut header| {
                     re_ui::DesignTokens::setup_table_header(&mut header);
-                    header.col(|ui| { ui.strong("Topic"); });
-                    header.col(|ui| { ui.strong("Type"); });
-                    header.col(|ui| { ui.strong("Pubs"); });
-                    header.col(|ui| { ui.strong("Subs"); });
+                    for (label, col) in [
+                        ("Topic", SortColumn::Topic),
+                        ("Type", SortColumn::Type),
+                        ("Pubs", SortColumn::Pubs),
+                        ("Subs", SortColumn::Subs),
+                    ] {
+                        header.col(|ui| {
+                            let arrow = if sort_col == col {
+                                if sort_asc { " ▲" } else { " ▼" }
+                            } else {
+                                ""
+                            };
+                            if ui
+                                .add(egui::Label::new(
+                                    egui::RichText::new(format!("{label}{arrow}")).strong(),
+                                ).sense(egui::Sense::click()))
+                                .clicked()
+                            {
+                                clicked_col = Some(col);
+                            }
+                        });
+                    }
                 })
                 .body(|mut body| {
                     tokens.setup_table_body(&mut body, table_style);
-                    body.rows(row_height, topics.entries.len(), |mut row| {
-                        let entry = &topics.entries[row.index()];
+                    body.rows(row_height, sorted.len(), |mut row| {
+                        let entry = sorted[row.index()];
                         row.col(|ui| { ui.label(&entry.topic_name); });
                         row.col(|ui| { ui.label(&entry.type_name); });
                         row.col(|ui| { ui.label(entry.publishers.to_string()); });
@@ -130,6 +184,15 @@ impl ViewClass for TopicsView {
                     });
                 });
         });
+
+        if let Some(col) = clicked_col {
+            if state.sort_column == col {
+                state.ascending = !state.ascending;
+            } else {
+                state.sort_column = col;
+                state.ascending = true;
+            }
+        }
 
         Ok(())
     }
