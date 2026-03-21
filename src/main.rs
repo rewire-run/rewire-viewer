@@ -6,9 +6,7 @@ mod views;
 
 use std::sync::{Arc, Mutex};
 
-use rerun::external::{
-    eframe, re_crash_handler, re_grpc_server, re_memory, re_viewer, tokio,
-};
+use rerun::external::{eframe, re_crash_handler, re_grpc_server, re_memory, re_viewer, tokio};
 use rewire_extras::HeartbeatTracker;
 
 #[global_allocator]

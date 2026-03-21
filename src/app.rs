@@ -13,17 +13,13 @@ pub struct RewireApp {
 }
 
 impl RewireApp {
-    pub fn new(
-        rerun_app: re_viewer::App,
-        tracker: Arc<Mutex<HeartbeatTracker>>,
-    ) -> Self {
+    pub fn new(rerun_app: re_viewer::App, tracker: Arc<Mutex<HeartbeatTracker>>) -> Self {
         Self {
             rerun_app,
             start_time: Instant::now(),
             tracker,
         }
     }
-
 }
 
 impl eframe::App for RewireApp {

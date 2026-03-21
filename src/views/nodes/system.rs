@@ -3,8 +3,8 @@ use rerun::external::{re_chunk_store, re_log_types, re_viewer_context};
 use re_chunk_store::LatestAtQuery;
 use re_log_types::{EntityPath, TimelineName};
 use re_viewer_context::{
-    IdentifiedViewSystem, ViewContext, ViewQuery, ViewSystemIdentifier, VisualizerExecutionOutput,
-    VisualizerQueryInfo, VisualizerSystem, ViewSystemExecutionError,
+    IdentifiedViewSystem, ViewContext, ViewQuery, ViewSystemExecutionError, ViewSystemIdentifier,
+    VisualizerExecutionOutput, VisualizerQueryInfo, VisualizerSystem,
 };
 
 use rewire_extras::ROS2NodeInfo;
@@ -56,10 +56,11 @@ impl VisualizerSystem for NodesSystem {
 
         self.entries.clear();
 
-        let results = entity_db
-            .storage_engine()
-            .cache()
-            .latest_at(&query, &entity_path, [node_name_id, pub_count_id, sub_count_id, transport_id]);
+        let results = entity_db.storage_engine().cache().latest_at(
+            &query,
+            &entity_path,
+            [node_name_id, pub_count_id, sub_count_id, transport_id],
+        );
 
         let names = results
             .component_batch_raw(node_name_id)

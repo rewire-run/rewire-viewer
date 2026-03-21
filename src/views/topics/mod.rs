@@ -1,7 +1,7 @@
 pub mod system;
 
-use rerun::external::{egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context};
 use re_ui::UiExt as _;
+use rerun::external::{egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context};
 
 use re_log_types::EntityPath;
 use re_sdk_types::ViewClassIdentifier;
@@ -159,14 +159,17 @@ impl ViewClass for TopicsView {
                         header.col(|ui| {
                             let is_active = sort_col == col;
                             let arrow = if is_active {
-                                if sort_asc { " ↑" } else { " ↓" }
+                                if sort_asc {
+                                    " ↑"
+                                } else {
+                                    " ↓"
+                                }
                             } else {
                                 ""
                             };
                             let text = egui::RichText::new(format!("{label}{arrow}")).strong();
-                            let response = ui.add(
-                                egui::Label::new(text).sense(egui::Sense::click()),
-                            );
+                            let response =
+                                ui.add(egui::Label::new(text).sense(egui::Sense::click()));
                             if response.hovered() {
                                 ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
                             }
@@ -180,10 +183,18 @@ impl ViewClass for TopicsView {
                     tokens.setup_table_body(&mut body, table_style);
                     body.rows(row_height, sorted.len(), |mut row| {
                         let entry = sorted[row.index()];
-                        row.col(|ui| { ui.label(&entry.topic_name); });
-                        row.col(|ui| { ui.label(&entry.type_name); });
-                        row.col(|ui| { ui.label(entry.publishers.to_string()); });
-                        row.col(|ui| { ui.label(entry.subscribers.to_string()); });
+                        row.col(|ui| {
+                            ui.label(&entry.topic_name);
+                        });
+                        row.col(|ui| {
+                            ui.label(&entry.type_name);
+                        });
+                        row.col(|ui| {
+                            ui.label(entry.publishers.to_string());
+                        });
+                        row.col(|ui| {
+                            ui.label(entry.subscribers.to_string());
+                        });
                     });
                 });
         });
