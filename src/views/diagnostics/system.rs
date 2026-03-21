@@ -59,10 +59,11 @@ impl VisualizerSystem for DiagnosticsSystem {
 
         self.entries.clear();
 
-        let results = entity_db
-            .storage_engine()
-            .cache()
-            .latest_at(&query, &entity_path, [topic_id, hz_id, bps_id, drops_id, latency_id]);
+        let results = entity_db.storage_engine().cache().latest_at(
+            &query,
+            &entity_path,
+            [topic_id, hz_id, bps_id, drops_id, latency_id],
+        );
 
         let topics = results
             .component_batch_raw(topic_id)
@@ -89,18 +90,9 @@ impl VisualizerSystem for DiagnosticsSystem {
             let latency_str = latency_vals.get(i).map(|s| s.as_str()).unwrap_or("");
             self.entries.push(DiagnosticsEntry {
                 topic: topics.get(i).cloned().unwrap_or_default(),
-                hz: hz_vals
-                    .get(i)
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(0.0),
-                bytes_per_sec: bps_vals
-                    .get(i)
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(0.0),
-                drops: drop_vals
-                    .get(i)
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(0),
+                hz: hz_vals.get(i).and_then(|s| s.parse().ok()).unwrap_or(0.0),
+                bytes_per_sec: bps_vals.get(i).and_then(|s| s.parse().ok()).unwrap_or(0.0),
+                drops: drop_vals.get(i).and_then(|s| s.parse().ok()).unwrap_or(0),
                 latency_ms: if latency_str.is_empty() {
                     None
                 } else {

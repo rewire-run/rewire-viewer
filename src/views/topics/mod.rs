@@ -157,25 +157,14 @@ impl ViewClass for TopicsView {
                         ("Subs", SortColumn::Subs),
                     ] {
                         header.col(|ui| {
-                            let is_active = sort_col == col;
-                            let arrow = if is_active {
-                                if sort_asc {
-                                    " ↑"
-                                } else {
-                                    " ↓"
-                                }
-                            } else {
-                                ""
-                            };
-                            let text = egui::RichText::new(format!("{label}{arrow}")).strong();
-                            let response =
-                                ui.add(egui::Label::new(text).sense(egui::Sense::click()));
-                            if response.hovered() {
-                                ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
-                            }
-                            if response.clicked() {
-                                clicked_col = Some(col);
-                            }
+                            crate::ui::sortable_header(
+                                ui,
+                                label,
+                                sort_col == col,
+                                sort_asc,
+                                &mut clicked_col,
+                                col,
+                            );
                         });
                     }
                 })

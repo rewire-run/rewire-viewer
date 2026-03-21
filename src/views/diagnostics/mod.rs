@@ -116,7 +116,9 @@ impl ViewClass for DiagnosticsView {
         let mut sorted: Vec<&system::DiagnosticsEntry> = diag.entries.iter().collect();
         match state.sort_column {
             SortColumn::Topic => sorted.sort_by(|a, b| a.topic.cmp(&b.topic)),
-            SortColumn::Hz => sorted.sort_by(|a, b| a.hz.partial_cmp(&b.hz).unwrap_or(std::cmp::Ordering::Equal)),
+            SortColumn::Hz => {
+                sorted.sort_by(|a, b| a.hz.partial_cmp(&b.hz).unwrap_or(std::cmp::Ordering::Equal))
+            }
             SortColumn::BytesPerSec => sorted.sort_by(|a, b| {
                 a.bytes_per_sec
                     .partial_cmp(&b.bytes_per_sec)
@@ -169,25 +171,14 @@ impl ViewClass for DiagnosticsView {
                         ("Latency", SortColumn::Latency),
                     ] {
                         header.col(|ui| {
-                            let is_active = sort_col == col;
-                            let arrow = if is_active {
-                                if sort_asc {
-                                    " ↑"
-                                } else {
-                                    " ↓"
-                                }
-                            } else {
-                                ""
-                            };
-                            let text = egui::RichText::new(format!("{label}{arrow}")).strong();
-                            let response =
-                                ui.add(egui::Label::new(text).sense(egui::Sense::click()));
-                            if response.hovered() {
-                                ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
-                            }
-                            if response.clicked() {
-                                clicked_col = Some(col);
-                            }
+                            crate::ui::sortable_header(
+                                ui,
+                                label,
+                                sort_col == col,
+                                sort_asc,
+                                &mut clicked_col,
+                                col,
+                            );
                         });
                     }
                 })
