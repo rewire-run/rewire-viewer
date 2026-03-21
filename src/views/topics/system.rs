@@ -1,6 +1,4 @@
-use rerun::external::{
-    arrow, re_chunk_store, re_log_types, re_viewer_context,
-};
+use rerun::external::{re_chunk_store, re_log_types, re_viewer_context};
 
 use re_chunk_store::LatestAtQuery;
 use re_log_types::{EntityPath, TimelineName};
@@ -65,19 +63,19 @@ impl VisualizerSystem for TopicsSystem {
 
         let names = results
             .component_batch_raw(topic_name_id)
-            .map(|arr| extract_texts(&arr))
+            .map(|arr| crate::util::extract_texts(&arr))
             .unwrap_or_default();
         let types = results
             .component_batch_raw(type_name_id)
-            .map(|arr| extract_texts(&arr))
+            .map(|arr| crate::util::extract_texts(&arr))
             .unwrap_or_default();
         let pub_counts = results
             .component_batch_raw(pub_count_id)
-            .map(|arr| extract_texts(&arr))
+            .map(|arr| crate::util::extract_texts(&arr))
             .unwrap_or_default();
         let sub_counts = results
             .component_batch_raw(sub_count_id)
-            .map(|arr| extract_texts(&arr))
+            .map(|arr| crate::util::extract_texts(&arr))
             .unwrap_or_default();
 
         for i in 0..names.len() {
@@ -95,17 +93,4 @@ impl VisualizerSystem for TopicsSystem {
     fn data(&self) -> Option<&dyn std::any::Any> {
         Some(self)
     }
-}
-
-fn extract_texts(array: &dyn arrow::array::Array) -> Vec<String> {
-    use arrow::array::Array as _;
-    let Some(string_array) = array
-        .as_any()
-        .downcast_ref::<arrow::array::StringArray>()
-    else {
-        return Vec::new();
-    };
-    (0..string_array.len())
-        .map(|i| string_array.value(i).to_string())
-        .collect()
 }

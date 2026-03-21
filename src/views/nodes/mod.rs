@@ -1,6 +1,6 @@
-use rerun::external::{
-    egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context,
-};
+pub mod system;
+
+use rerun::external::{egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context};
 use re_ui::UiExt as _;
 
 use re_log_types::EntityPath;
@@ -11,7 +11,7 @@ use re_viewer_context::{
     ViewSystemRegistrator, ViewerContext,
 };
 
-use crate::nodes_system::NodesSystem;
+use self::system::NodesSystem;
 
 #[derive(Default)]
 pub struct NodesView;
@@ -112,7 +112,7 @@ impl ViewClass for NodesView {
             return Ok(());
         }
 
-        let mut sorted: Vec<&crate::nodes_system::NodeEntry> = nodes.entries.iter().collect();
+        let mut sorted: Vec<&system::NodeEntry> = nodes.entries.iter().collect();
         match state.sort_column {
             SortColumn::Node => sorted.sort_by(|a, b| a.node_name.cmp(&b.node_name)),
             SortColumn::Pubs => sorted.sort_by(|a, b| a.publishers.cmp(&b.publishers)),

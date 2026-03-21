@@ -1,6 +1,6 @@
-use rerun::external::{
-    egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context,
-};
+pub mod system;
+
+use rerun::external::{egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context};
 use re_ui::UiExt as _;
 
 use re_log_types::EntityPath;
@@ -11,7 +11,7 @@ use re_viewer_context::{
     ViewSystemRegistrator, ViewerContext,
 };
 
-use crate::topics_system::TopicsSystem;
+use self::system::TopicsSystem;
 
 #[derive(Default)]
 pub struct TopicsView;
@@ -112,7 +112,7 @@ impl ViewClass for TopicsView {
             return Ok(());
         }
 
-        let mut sorted: Vec<&crate::topics_system::TopicEntry> = topics.entries.iter().collect();
+        let mut sorted: Vec<&system::TopicEntry> = topics.entries.iter().collect();
         match state.sort_column {
             SortColumn::Topic => sorted.sort_by(|a, b| a.topic_name.cmp(&b.topic_name)),
             SortColumn::Type => sorted.sort_by(|a, b| a.type_name.cmp(&b.type_name)),
