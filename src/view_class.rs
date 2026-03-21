@@ -80,51 +80,56 @@ impl ViewClass for TopicsView {
         _query: &ViewQuery<'_>,
         system_output: SystemExecutionOutput,
     ) -> Result<(), ViewSystemExecutionError> {
+        let tokens = ui.tokens();
         let topics = system_output.view_systems.get::<TopicsSystem>()?;
-
-        ui.add_space(4.0);
 
         if topics.entries.is_empty() {
             ui.vertical_centered(|ui| {
                 ui.add_space(20.0);
-                ui.label(
-                    egui::RichText::new("No topics yet")
-                        .color(egui::Color32::from_gray(120)),
-                );
+                ui.weak("No topics yet");
             });
             return Ok(());
         }
 
-        use egui_extras::{Column, TableBuilder};
+        use egui_extras::Column;
 
-        let tokens = ui.tokens();
-        let row_height = tokens.table_row_height(re_ui::TableStyle::Dense);
+        let table_style = re_ui::TableStyle::Dense;
+        let row_height = tokens.table_row_height(table_style);
 
-        TableBuilder::new(ui)
-            .resizable(true)
-            .vscroll(true)
-            .max_scroll_height(f32::INFINITY)
-            .column(Column::auto().at_least(100.0).clip(true))
-            .column(Column::auto().at_least(120.0).clip(true))
-            .column(Column::auto().at_least(30.0))
-            .column(Column::remainder().at_least(30.0))
-            .header(tokens.deprecated_table_header_height(), |mut header| {
-                re_ui::DesignTokens::setup_table_header(&mut header);
-                header.col(|ui| { ui.label("Topic"); });
-                header.col(|ui| { ui.label("Type"); });
-                header.col(|ui| { ui.label("Pubs"); });
-                header.col(|ui| { ui.label("Subs"); });
-            })
-            .body(|mut body| {
-                tokens.setup_table_body(&mut body, re_ui::TableStyle::Dense);
-                body.rows(row_height, topics.entries.len(), |mut row| {
-                    let entry = &topics.entries[row.index()];
-                    row.col(|ui| { ui.label(&entry.topic_name); });
-                    row.col(|ui| { ui.label(&entry.type_name); });
-                    row.col(|ui| { ui.label(entry.publishers.to_string()); });
-                    row.col(|ui| { ui.label(entry.subscribers.to_string()); });
+        egui::Frame {
+            inner_margin: tokens.view_padding().into(),
+            ..egui::Frame::default()
+        }
+        .show(ui, |ui| {
+            egui_extras::TableBuilder::new(ui)
+                .resizable(true)
+                .vscroll(true)
+                .auto_shrink([false; 2])
+                .min_scrolled_height(0.0)
+                .max_scroll_height(f32::INFINITY)
+                .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
+                .column(Column::auto().at_least(100.0).clip(true))
+                .column(Column::auto().at_least(120.0).clip(true))
+                .column(Column::auto().at_least(30.0))
+                .column(Column::remainder().at_least(30.0))
+                .header(tokens.deprecated_table_header_height(), |mut header| {
+                    re_ui::DesignTokens::setup_table_header(&mut header);
+                    header.col(|ui| { ui.strong("Topic"); });
+                    header.col(|ui| { ui.strong("Type"); });
+                    header.col(|ui| { ui.strong("Pubs"); });
+                    header.col(|ui| { ui.strong("Subs"); });
+                })
+                .body(|mut body| {
+                    tokens.setup_table_body(&mut body, table_style);
+                    body.rows(row_height, topics.entries.len(), |mut row| {
+                        let entry = &topics.entries[row.index()];
+                        row.col(|ui| { ui.label(&entry.topic_name); });
+                        row.col(|ui| { ui.label(&entry.type_name); });
+                        row.col(|ui| { ui.label(entry.publishers.to_string()); });
+                        row.col(|ui| { ui.label(entry.subscribers.to_string()); });
+                    });
                 });
-            });
+        });
 
         Ok(())
     }
