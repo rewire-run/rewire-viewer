@@ -8,20 +8,62 @@ keywords = ["ros2", "rerun", "robotics", "visualization", "rewire"]
 categories = ["science::robotics", "visualization"]
 repository = "https://github.com/rewire-run/rewire-viewer"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [[bin]]
 name = "rewire-viewer"
 path = "src/main.rs"
 
+[features]
+default = ["native"]
+native = ["rewire-extras/grpc"]
+
 [dependencies]
+arrow = "56"
+egui = "0.33"
+egui_extras = "0.33"
+re_chunk_store = "0.30"
+re_entity_db = "0.30"
+re_log = "0.30"
+re_log_types = "0.30"
+re_sdk_types = "0.30"
+re_types_core = "0.30"
+re_ui = "0.30"
+re_viewer = { version = "0.30", default-features = false }
+re_viewer_context = "0.30"
+rewire-extras = { path = "../rewire-extras", default-features = false }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+clap = { version = "4", features = ["derive"] }
+eframe = "0.33"
+mimalloc = "0.1"
+re_crash_handler = "0.30"
+re_grpc_server = "0.30"
+re_memory = "0.30"
 rerun = { version = "0.30", default-features = false, features = [
   "native_viewer",
   "sdk",
   "server",
 ] }
-clap = { version = "4", features = ["derive"] }
-egui_extras = "0.33"
-mimalloc = "0.1"
-re_types_core = "0.30"
-rewire-extras = { path = "../rewire-extras" }
-tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 tonic = "0.14"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+eframe = { version = "0.33", default-features = false, features = ["wgpu"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3.77", features = [
+  "DomException",
+  "EncodedVideoChunk",
+  "EncodedVideoChunkInit",
+  "EncodedVideoChunkType",
+  "HardwareAcceleration",
+  "HtmlCanvasElement",
+  "Navigator",
+  "VideoDecoder",
+  "VideoDecoderConfig",
+  "VideoDecoderInit",
+  "VideoFrame",
+  "Window",
+] }

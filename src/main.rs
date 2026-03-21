@@ -1,14 +1,14 @@
-mod app;
-mod grpc;
-mod ui;
-mod util;
-mod views;
-
 use std::sync::{Arc, Mutex};
 
 use clap::Parser;
-use rerun::external::{eframe, re_crash_handler, re_grpc_server, re_memory, re_viewer, tokio};
+use eframe;
+use re_crash_handler;
+use re_grpc_server;
+use re_memory;
+use re_viewer;
+use tokio;
 use rewire_extras::HeartbeatTracker;
+use rewire_viewer::{app, grpc, views};
 
 /// Rewire viewer based on Rerun API for bridge introspection.
 #[derive(Parser)]
@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let main_thread_token = re_viewer::MainThreadToken::i_promise_i_am_on_the_main_thread();
-    rerun::external::re_log::setup_logging();
+    re_log::setup_logging();
     re_crash_handler::install_crash_handlers(re_viewer::build_info());
 
     let tracker = Arc::new(Mutex::new(HeartbeatTracker::default()));

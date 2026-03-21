@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use rerun::external::{arrow, egui, re_chunk_store, re_entity_db, re_log_types};
+use egui;
+use re_chunk_store;
+use re_entity_db;
+use re_log_types;
 use rewire_extras::{ROS2NodeInfo, ROS2TopicInfo};
 
 pub struct StatusBar {

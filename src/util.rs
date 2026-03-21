@@ -1,4 +1,4 @@
-use rerun::external::arrow;
+use arrow;
 
 pub fn extract_texts(array: &dyn arrow::array::Array) -> Vec<String> {
     use arrow::array::Array as _;

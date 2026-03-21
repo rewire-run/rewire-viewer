@@ -1,23 +1,36 @@
-use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
-use rerun::external::{eframe, egui, re_viewer};
-use rewire_extras::HeartbeatTracker;
+use eframe;
+use egui;
+use re_viewer;
 
 use crate::ui::StatusBar;
 
 pub struct RewireApp {
     rerun_app: re_viewer::App,
     start_time: Instant,
-    tracker: Arc<Mutex<HeartbeatTracker>>,
+    #[cfg(not(target_arch = "wasm32"))]
+    tracker: std::sync::Arc<std::sync::Mutex<rewire_extras::HeartbeatTracker>>,
 }
 
 impl RewireApp {
-    pub fn new(rerun_app: re_viewer::App, tracker: Arc<Mutex<HeartbeatTracker>>) -> Self {
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn new(
+        rerun_app: re_viewer::App,
+        tracker: std::sync::Arc<std::sync::Mutex<rewire_extras::HeartbeatTracker>>,
+    ) -> Self {
         Self {
             rerun_app,
             start_time: Instant::now(),
             tracker,
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn new(rerun_app: re_viewer::App) -> Self {
+        Self {
+            rerun_app,
+            start_time: Instant::now(),
         }
     }
 }
@@ -31,7 +44,12 @@ impl eframe::App for RewireApp {
         ctx.request_repaint_after(std::time::Duration::from_secs(1));
 
         let db = self.rerun_app.recording_db();
+
+        #[cfg(not(target_arch = "wasm32"))]
         let (connected, bridge_count) = self.tracker.lock().unwrap().status();
+        #[cfg(target_arch = "wasm32")]
+        let (connected, bridge_count) = (false, 0);
+
         let status = StatusBar::new(db, connected, bridge_count, self.start_time.elapsed());
 
         egui::TopBottomPanel::bottom("rewire_status_bar")

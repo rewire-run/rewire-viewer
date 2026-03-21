@@ -1,6 +1,6 @@
 mod status_bar;
 
-use rerun::external::egui;
+use egui;
 
 pub use status_bar::StatusBar;
 

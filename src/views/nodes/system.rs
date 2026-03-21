@@ -1,4 +1,6 @@
-use rerun::external::{re_chunk_store, re_log_types, re_viewer_context};
+use re_chunk_store;
+use re_log_types;
+use re_viewer_context;
 
 use re_chunk_store::LatestAtQuery;
 use re_log_types::{EntityPath, TimelineName};

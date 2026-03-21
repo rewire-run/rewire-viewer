@@ -1,7 +1,12 @@
 pub mod system;
 
 use re_ui::UiExt as _;
-use rerun::external::{egui, re_chunk_store, re_log_types, re_sdk_types, re_ui, re_viewer_context};
+use egui;
+use re_chunk_store;
+use re_log_types;
+use re_sdk_types;
+use re_ui;
+use re_viewer_context;
 
 use re_log_types::EntityPath;
 use re_sdk_types::ViewClassIdentifier;

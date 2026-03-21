@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use rerun::external::re_log;
+use re_log;
 use rewire_extras::proto::v1::rewire_service_server::{RewireService, RewireServiceServer};
 use rewire_extras::proto::v1::{
     GetInfoRequest, GetInfoResponse, HeartbeatRequest, HeartbeatResponse,
