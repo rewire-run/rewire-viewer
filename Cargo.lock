@@ -8680,6 +8680,7 @@ dependencies = [
 [[package]]
 name = "rewire-extras"
 version = "0.1.0"
+source = "git+https://github.com/rewire-run/rewire-extras?tag=v0.1.0#dd9293b466529960cc308569a2964589187db277"
 dependencies = [
  "re_types_core",
  "rerun",

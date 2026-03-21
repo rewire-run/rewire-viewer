@@ -23,5 +23,5 @@ egui_extras = "0.33"
 serde_json = "1"
 mimalloc = "0.1"
 re_types_core = "0.30"
-rewire-extras = { path = "../rewire-extras" }
+rewire-extras = { git = "https://github.com/rewire-run/rewire-extras", tag = "v0.1.0" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
