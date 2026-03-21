@@ -105,7 +105,9 @@ impl ViewClass for TopicsView {
             .striped(true)
             .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
             .column(Column::auto().at_least(160.0).clip(true))
-            .column(Column::auto().at_least(200.0).clip(true))
+            .column(Column::auto().at_least(180.0).clip(true))
+            .column(Column::auto().at_least(40.0))
+            .column(Column::auto().at_least(40.0))
             .column(Column::remainder().at_least(70.0))
             .header(header_height, |mut header| {
                 header.col(|ui| {
@@ -115,6 +117,14 @@ impl ViewClass for TopicsView {
                 header.col(|ui| {
                     ui.add_space(8.0);
                     ui.strong("Type");
+                });
+                header.col(|ui| {
+                    ui.add_space(8.0);
+                    ui.strong("Pubs");
+                });
+                header.col(|ui| {
+                    ui.add_space(8.0);
+                    ui.strong("Subs");
                 });
                 header.col(|ui| {
                     ui.add_space(8.0);
@@ -136,6 +146,14 @@ impl ViewClass for TopicsView {
                             egui::RichText::new(&entry.type_name)
                                 .color(egui::Color32::from_gray(180)),
                         );
+                    });
+                    row.col(|ui| {
+                        ui.add_space(8.0);
+                        ui.label(entry.publishers.to_string());
+                    });
+                    row.col(|ui| {
+                        ui.add_space(8.0);
+                        ui.label(entry.subscribers.to_string());
                     });
                     row.col(|ui| {
                         ui.add_space(8.0);

@@ -15,6 +15,8 @@ pub struct TopicEntry {
     pub topic_name: String,
     pub type_name: String,
     pub status: String,
+    pub publishers: usize,
+    pub subscribers: usize,
 }
 
 pub struct TopicsSystem {
@@ -58,6 +60,8 @@ impl VisualizerSystem for TopicsSystem {
         let topic_name_id = ROS2TopicInfo::descriptor_topic_name().component;
         let type_name_id = ROS2TopicInfo::descriptor_type_name().component;
         let status_id = ROS2TopicInfo::descriptor_status().component;
+        let pub_count_id = ROS2TopicInfo::descriptor_publisher_count().component;
+        let sub_count_id = ROS2TopicInfo::descriptor_subscriber_count().component;
 
         let entity_path = EntityPath::from("/rewire/topics");
 
@@ -66,7 +70,7 @@ impl VisualizerSystem for TopicsSystem {
         let results = entity_db
             .storage_engine()
             .cache()
-            .latest_at(&query, &entity_path, [topic_name_id, type_name_id, status_id]);
+            .latest_at(&query, &entity_path, [topic_name_id, type_name_id, status_id, pub_count_id, sub_count_id]);
 
         let names = results
             .component_batch_raw(topic_name_id)
@@ -80,12 +84,22 @@ impl VisualizerSystem for TopicsSystem {
             .component_batch_raw(status_id)
             .map(|arr| extract_texts(&arr))
             .unwrap_or_default();
+        let pub_counts = results
+            .component_batch_raw(pub_count_id)
+            .map(|arr| extract_texts(&arr))
+            .unwrap_or_default();
+        let sub_counts = results
+            .component_batch_raw(sub_count_id)
+            .map(|arr| extract_texts(&arr))
+            .unwrap_or_default();
 
         for i in 0..names.len() {
             self.entries.push(TopicEntry {
                 topic_name: names.get(i).cloned().unwrap_or_default(),
                 type_name: types.get(i).cloned().unwrap_or_default(),
                 status: statuses.get(i).cloned().unwrap_or_else(|| "unknown".into()),
+                publishers: pub_counts.get(i).and_then(|s| s.parse().ok()).unwrap_or(0),
+                subscribers: sub_counts.get(i).and_then(|s| s.parse().ok()).unwrap_or(0),
             });
         }
 
