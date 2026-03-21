@@ -1,11 +1,11 @@
 pub mod system;
 
-use re_ui::UiExt as _;
 use egui;
 use re_chunk_store;
 use re_log_types;
 use re_sdk_types;
 use re_ui;
+use re_ui::UiExt as _;
 use re_viewer_context;
 
 use re_log_types::EntityPath;
