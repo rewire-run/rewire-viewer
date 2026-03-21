@@ -32,7 +32,7 @@ re_types_core = "0.30"
 re_ui = "0.30"
 re_viewer = { version = "0.30", default-features = false }
 re_viewer_context = "0.30"
-rewire-extras = { path = "../rewire-extras", default-features = false }
+rewire-extras = { git = "https://github.com/rewire-run/rewire-extras", tag = "v0.1.2", default-features = false }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 clap = { version = "4", features = ["derive"] }
