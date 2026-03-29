@@ -36,13 +36,18 @@ impl RewireService for RewireServiceImpl {
     }
 }
 
-pub async fn serve(tracker: Arc<Mutex<HeartbeatTracker>>) {
+pub async fn serve(tracker: Arc<Mutex<HeartbeatTracker>>, port: u16) {
     let svc = RewireServiceImpl { tracker };
-    let addr = "0.0.0.0:9877".parse().unwrap();
-    re_log::info!("Listening for gRPC connections on 0.0.0.0:9877. Used by bridges to advertise themselves and query viewer info.");
-    tonic::transport::Server::builder()
+    let addr: std::net::SocketAddr = ([0, 0, 0, 0], port).into();
+    re_log::info!("Listening for gRPC connections on {addr}. Used by bridges to advertise themselves and query viewer info.");
+    if let Err(err) = tonic::transport::Server::builder()
         .add_service(RewireServiceServer::new(svc))
         .serve(addr)
         .await
-        .unwrap();
+    {
+        re_log::error!(
+            "Rewire gRPC server on port {port} failed: {err}. Is another viewer already running?"
+        );
+        std::process::exit(1);
+    }
 }

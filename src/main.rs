@@ -7,31 +7,51 @@ use rewire_viewer::{app, grpc, views};
 /// Rewire viewer based on Rerun API for bridge introspection.
 #[derive(Parser)]
 #[command(name = "rewire-viewer", version)]
-struct Cli {}
+struct Cli {
+    /// Port for the Rerun gRPC data stream
+    #[arg(long, default_value_t = 9876)]
+    port: u16,
+
+    /// Port for the Rewire gRPC service (bridge heartbeats, viewer info) [default: port + 1]
+    #[arg(long)]
+    grpc_port: Option<u16>,
+}
 
 #[global_allocator]
 static GLOBAL: re_memory::AccountingAllocator<mimalloc::MiMalloc> =
     re_memory::AccountingAllocator::new(mimalloc::MiMalloc);
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    Cli::parse();
+    let cli = Cli::parse();
 
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?
-        .block_on(run())
+        .block_on(run(cli))
 }
 
-async fn run() -> Result<(), Box<dyn std::error::Error>> {
+async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     let main_thread_token = re_viewer::MainThreadToken::i_promise_i_am_on_the_main_thread();
     re_log::setup_logging();
     re_crash_handler::install_crash_handlers(re_viewer::build_info());
 
-    let tracker = Arc::new(Mutex::new(HeartbeatTracker::default()));
-    tokio::spawn(grpc::serve(tracker.clone()));
+    let grpc_port = cli.grpc_port.unwrap_or(cli.port + 1);
 
+    for port in [cli.port, grpc_port] {
+        if std::net::TcpListener::bind(("0.0.0.0", port)).is_err() {
+            re_log::error!(
+                "Port {port} is already in use. Is another viewer or Rerun instance running?"
+            );
+            std::process::exit(1);
+        }
+    }
+
+    let tracker = Arc::new(Mutex::new(HeartbeatTracker::default()));
+    tokio::spawn(grpc::serve(tracker.clone(), grpc_port));
+
+    let addr = format!("0.0.0.0:{}", cli.port);
     let rx = re_grpc_server::spawn_with_recv(
-        "0.0.0.0:9876".parse()?,
+        addr.parse()?,
         Default::default(),
         re_grpc_server::shutdown::never(),
     );
