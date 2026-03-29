@@ -18,6 +18,7 @@ use re_viewer_context::{
 
 use self::system::NodesSystem;
 
+/// Rerun SpaceView that displays a sortable table of ROS 2 nodes.
 #[derive(Default)]
 pub struct NodesView;
 

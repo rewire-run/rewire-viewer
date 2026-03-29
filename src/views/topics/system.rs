@@ -11,15 +11,22 @@ use re_viewer_context::{
 
 use rewire_extras::ROS2TopicInfo;
 
+/// A single row in the Topics panel.
 pub struct TopicEntry {
+    /// Fully-qualified ROS 2 topic name (e.g. `/camera/image_raw`).
     pub topic_name: String,
+    /// ROS 2 message type (e.g. `sensor_msgs/msg/Image`).
     pub type_name: String,
+    /// Number of publishers on this topic.
     pub publishers: usize,
+    /// Number of subscribers on this topic.
     pub subscribers: usize,
 }
 
+/// Visualizer that queries [`ROS2TopicInfo`] from the chunk store at `/rewire/topics`.
 #[derive(Default)]
 pub struct TopicsSystem {
+    /// Topic entries populated each frame by [`VisualizerSystem::execute`].
     pub entries: Vec<TopicEntry>,
 }
 

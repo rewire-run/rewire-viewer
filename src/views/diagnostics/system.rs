@@ -11,16 +11,24 @@ use re_viewer_context::{
 
 use rewire_extras::ROS2DiagnosticsInfo;
 
+/// A single row in the Diagnostics panel.
 pub struct DiagnosticsEntry {
+    /// Topic name this diagnostic applies to.
     pub topic: String,
+    /// Message publish rate in Hz.
     pub hz: f64,
+    /// Throughput in bytes per second.
     pub bytes_per_sec: f64,
+    /// Cumulative number of dropped messages.
     pub drops: u64,
+    /// End-to-end latency in milliseconds, if measured.
     pub latency_ms: Option<f64>,
 }
 
+/// Visualizer that queries [`ROS2DiagnosticsInfo`] from the chunk store at `/rewire/diagnostics`.
 #[derive(Default)]
 pub struct DiagnosticsSystem {
+    /// Diagnostics entries populated each frame by [`VisualizerSystem::execute`].
     pub entries: Vec<DiagnosticsEntry>,
 }
 

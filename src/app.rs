@@ -9,6 +9,7 @@ use re_viewer;
 
 use crate::ui::StatusBar;
 
+/// Top-level eframe application that wraps [`re_viewer::App`] with a Rewire status bar.
 pub struct RewireApp {
     rerun_app: re_viewer::App,
     start_time: Instant,
@@ -17,6 +18,7 @@ pub struct RewireApp {
 }
 
 impl RewireApp {
+    /// Creates a new native viewer with a heartbeat tracker for bridge connectivity.
     #[cfg(not(target_arch = "wasm32"))]
     pub fn new(
         rerun_app: re_viewer::App,
@@ -29,6 +31,7 @@ impl RewireApp {
         }
     }
 
+    /// Creates a new WASM viewer (no heartbeat tracking).
     #[cfg(target_arch = "wasm32")]
     pub fn new(rerun_app: re_viewer::App) -> Self {
         Self {

@@ -4,6 +4,9 @@ use egui;
 
 pub use status_bar::StatusBar;
 
+/// Renders a clickable column header with a sort-direction indicator.
+///
+/// When clicked, sets `clicked` to `col` so the caller can toggle sort state.
 pub fn sortable_header<C: Copy>(
     ui: &mut egui::Ui,
     label: &str,

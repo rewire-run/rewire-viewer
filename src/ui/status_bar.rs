@@ -6,6 +6,7 @@ use re_entity_db;
 use re_log_types;
 use rewire_extras::{ROS2NodeInfo, ROS2TopicInfo};
 
+/// Bottom bar showing connection state, bridge count, node/topic counts, and uptime.
 pub struct StatusBar {
     has_db: bool,
     connected: bool,
@@ -17,6 +18,7 @@ pub struct StatusBar {
 }
 
 impl StatusBar {
+    /// Snapshots the current viewer state for rendering.
     pub fn new(
         db: Option<&re_entity_db::EntityDb>,
         connected: bool,
@@ -36,6 +38,7 @@ impl StatusBar {
         }
     }
 
+    /// Draws the status bar into the given `Ui`.
     pub fn render(&self, ui: &mut egui::Ui) {
         ui.add_space(2.0);
         ui.horizontal(|ui| {

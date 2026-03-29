@@ -36,6 +36,10 @@ impl RewireService for RewireServiceImpl {
     }
 }
 
+/// Starts the Rewire gRPC service on the given port.
+///
+/// Serves [`RewireService`] which handles bridge heartbeats and viewer info queries.
+/// Exits the process if the server fails to bind.
 pub async fn serve(tracker: Arc<Mutex<HeartbeatTracker>>, port: u16) {
     let svc = RewireServiceImpl { tracker };
     let addr: std::net::SocketAddr = ([0, 0, 0, 0], port).into();

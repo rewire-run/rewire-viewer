@@ -18,6 +18,7 @@ use re_viewer_context::{
 
 use self::system::TopicsSystem;
 
+/// Rerun SpaceView that displays a sortable table of ROS 2 topics.
 #[derive(Default)]
 pub struct TopicsView;
 

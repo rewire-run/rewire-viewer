@@ -11,15 +11,22 @@ use re_viewer_context::{
 
 use rewire_extras::ROS2NodeInfo;
 
+/// A single row in the Nodes panel.
 pub struct NodeEntry {
+    /// Fully-qualified ROS 2 node name (e.g. `/camera_driver`).
     pub node_name: String,
+    /// Number of topics this node publishes.
     pub publishers: usize,
+    /// Number of topics this node subscribes to.
     pub subscribers: usize,
+    /// DDS or Zenoh transport identifier.
     pub transport: String,
 }
 
+/// Visualizer that queries [`ROS2NodeInfo`] from the chunk store at `/rewire/nodes`.
 #[derive(Default)]
 pub struct NodesSystem {
+    /// Node entries populated each frame by [`VisualizerSystem::execute`].
     pub entries: Vec<NodeEntry>,
 }
 

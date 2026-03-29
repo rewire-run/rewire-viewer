@@ -18,6 +18,7 @@ use re_viewer_context::{
 
 use self::system::DiagnosticsSystem;
 
+/// Rerun SpaceView that displays per-topic diagnostics (Hz, throughput, drops, latency).
 #[derive(Default)]
 pub struct DiagnosticsView;
 

@@ -5,6 +5,7 @@ use re_viewer;
 
 use crate::{app::RewireApp, views};
 
+/// Handle for the WASM viewer, exposed to JavaScript via `wasm-bindgen`.
 #[wasm_bindgen]
 pub struct RewireWebHandle {
     runner: eframe::WebRunner,
@@ -12,6 +13,7 @@ pub struct RewireWebHandle {
 
 #[wasm_bindgen]
 impl RewireWebHandle {
+    /// Creates a new viewer handle and initializes logging.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<RewireWebHandle, JsValue> {
         eframe::WebLogger::init(re_log::LevelFilter::Debug).ok();
@@ -20,6 +22,7 @@ impl RewireWebHandle {
         })
     }
 
+    /// Starts the viewer on the given canvas, optionally loading an `.rrd` URL.
     #[wasm_bindgen]
     pub async fn start(
         &self,
@@ -57,16 +60,19 @@ impl RewireWebHandle {
             .await
     }
 
+    /// Destroys the viewer and releases GPU resources.
     #[wasm_bindgen]
     pub fn destroy(&self) {
         self.runner.destroy();
     }
 
+    /// Returns `true` if the viewer has panicked.
     #[wasm_bindgen]
     pub fn has_panicked(&self) -> bool {
         self.runner.panic_summary().is_some()
     }
 
+    /// Returns the panic message, if any.
     #[wasm_bindgen]
     pub fn panic_message(&self) -> Option<String> {
         self.runner.panic_summary().map(|s| s.message())
