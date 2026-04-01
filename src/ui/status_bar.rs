@@ -4,13 +4,14 @@ use egui;
 use re_chunk_store;
 use re_entity_db;
 use re_log_types;
-use rewire_extras::{ROS2NodeInfo, ROS2TopicInfo};
+use rewire_extras::{BridgeState, ROS2NodeInfo, ROS2TopicInfo};
 
 /// Bottom bar showing connection state, bridge count, node/topic counts, and uptime.
 pub struct StatusBar {
     has_db: bool,
     connected: bool,
     bridge_count: usize,
+    bridge_state: BridgeState,
     node_count: usize,
     topic_count: usize,
     app_id: String,
@@ -23,12 +24,14 @@ impl StatusBar {
         db: Option<&re_entity_db::EntityDb>,
         connected: bool,
         bridge_count: usize,
+        bridge_state: BridgeState,
         uptime: Duration,
     ) -> Self {
         Self {
             has_db: db.is_some(),
             connected,
             bridge_count,
+            bridge_state,
             node_count: db.map(node_count).unwrap_or(0),
             topic_count: db.map(topic_count).unwrap_or(0),
             app_id: db
@@ -52,8 +55,16 @@ impl StatusBar {
             }
 
             if self.connected {
-                ui.colored_label(egui::Color32::from_rgb(80, 200, 120), "⬤");
-                ui.label("Connected");
+                match self.bridge_state {
+                    BridgeState::Active => {
+                        ui.colored_label(egui::Color32::from_rgb(80, 200, 120), "⬤");
+                        ui.label("Connected");
+                    }
+                    BridgeState::Idle => {
+                        ui.colored_label(egui::Color32::from_rgb(220, 180, 50), "⬤");
+                        ui.label("Idle");
+                    }
+                }
             } else {
                 ui.colored_label(egui::Color32::from_rgb(200, 80, 80), "⬤");
                 ui.label("Disconnected");
