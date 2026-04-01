@@ -54,7 +54,7 @@ The viewer starts two servers:
 | Port | Protocol | Purpose                                                     |
 |------|----------|------------------------------------------------------------ |
 | 9876 | gRPC     | Rerun data stream (connect with `--connect 127.0.0.1:9876`) |
-| 9877 | gRPC     | Viewer API                                                  |
+| 9877 | gRPC     | Viewer API ([proto](https://github.com/rewire-run/rewire-extras/blob/main/proto/rewire/v1/rewire.proto)) |
 
 ## License
 
