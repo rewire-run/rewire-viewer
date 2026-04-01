@@ -20,8 +20,8 @@ jobs:
           components: rustfmt
       - run: cargo fmt --check
 
-  clippy:
-    name: clippy
+  lint:
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
