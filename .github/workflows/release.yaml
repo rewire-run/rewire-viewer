@@ -80,7 +80,7 @@ jobs:
       - name: Install wasm-bindgen
         uses: taiki-e/install-action@v2
         with:
-          tool: wasm-bindgen-cli@0.2.100
+          tool: wasm-bindgen-cli@0.2.108
 
       - name: Install LLVM tools
         run: sudo apt-get update && sudo apt-get install -y llvm clang
