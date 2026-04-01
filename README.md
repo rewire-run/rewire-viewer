@@ -26,7 +26,7 @@ A custom [Rerun](https://rerun.io) viewer for ROS 2 visualization, built on top 
 - **Topics Panel** — sortable table of subscribed ROS 2 topics with type, publisher count, and subscriber count
 - **Nodes Panel** — sortable table of discovered ROS 2 nodes with transport info
 - **Status Bar** — real-time connection status, bridge count, node count, topic count, and uptime
-- **HTTP API** — info and heartbeat endpoints for bridge integration
+- **gRPC API** — info and heartbeat endpoints for bridge integration
 
 ## Build
 
@@ -51,10 +51,10 @@ cargo run --release
 
 The viewer starts two servers:
 
-| Port | Protocol | Purpose                              |
-|------|----------|--------------------------------------|
+| Port | Protocol | Purpose                                                     |
+|------|----------|------------------------------------------------------------ |
 | 9876 | gRPC     | Rerun data stream (connect with `--connect 127.0.0.1:9876`) |
-| 9877 | HTTP     | Viewer API (`GET /api/info`, `POST /api/heartbeat/{id}`)    |
+| 9877 | gRPC     | Viewer API                                                  |
 
 ## License
 
