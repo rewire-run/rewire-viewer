@@ -46,9 +46,12 @@ impl eframe::App for RewireApp {
         self.rerun_app.save(storage);
     }
 
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn logic(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         ctx.request_repaint_after(std::time::Duration::from_secs(1));
+        self.rerun_app.logic(ctx, frame);
+    }
 
+    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         let db = self.rerun_app.recording_db();
 
         #[cfg(not(target_arch = "wasm32"))]
@@ -58,12 +61,12 @@ impl eframe::App for RewireApp {
 
         let status = StatusBar::new(db, connected, bridge_count, self.start_time.elapsed());
 
-        egui::TopBottomPanel::bottom("rewire_status_bar")
-            .exact_height(24.0)
-            .show(ctx, |ui| {
+        egui::Panel::bottom("rewire_status_bar")
+            .exact_size(24.0)
+            .show_inside(ui, |ui| {
                 status.render(ui);
             });
 
-        self.rerun_app.update(ctx, frame);
+        self.rerun_app.ui(ui, frame);
     }
 }

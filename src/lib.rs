@@ -11,6 +11,8 @@ pub mod app;
 /// gRPC service for bridge heartbeats and viewer info queries.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod grpc;
+/// Custom view icons for Rewire panels.
+pub mod icons;
 /// Status bar and shared UI helpers.
 pub mod ui;
 /// Shared utilities for extracting data from Arrow arrays.

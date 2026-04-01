@@ -67,7 +67,7 @@ impl ViewClass for NodesView {
     }
 
     fn icon(&self) -> &'static re_ui::Icon {
-        &re_ui::icons::VIEW_TEXT
+        &crate::icons::VIEW_NODES
     }
 
     fn help(&self, _os: egui::os::OperatingSystem) -> re_ui::Help {
