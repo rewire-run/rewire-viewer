@@ -55,11 +55,17 @@ impl eframe::App for RewireApp {
         let db = self.rerun_app.recording_db();
 
         #[cfg(not(target_arch = "wasm32"))]
-        let (connected, bridge_count) = self.tracker.lock().unwrap().status();
+        let (connected, bridge_count, bridge_state) = self.tracker.lock().unwrap().status();
         #[cfg(target_arch = "wasm32")]
-        let (connected, bridge_count) = (false, 0);
+        let (connected, bridge_count, bridge_state) = (false, 0, rewire_extras::BridgeState::Idle);
 
-        let status = StatusBar::new(db, connected, bridge_count, self.start_time.elapsed());
+        let status = StatusBar::new(
+            db,
+            connected,
+            bridge_count,
+            bridge_state,
+            self.start_time.elapsed(),
+        );
 
         egui::Panel::bottom("rewire_status_bar")
             .exact_size(24.0)

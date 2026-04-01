@@ -28,10 +28,9 @@ impl RewireService for RewireServiceImpl {
         &self,
         req: Request<HeartbeatRequest>,
     ) -> Result<Response<HeartbeatResponse>, Status> {
-        self.tracker
-            .lock()
-            .unwrap()
-            .beat(&req.into_inner().bridge_id);
+        let inner = req.into_inner();
+        let state = rewire_extras::BridgeState::from(inner.state);
+        self.tracker.lock().unwrap().beat(&inner.bridge_id, state);
         Ok(Response::new(HeartbeatResponse {}))
     }
 }
