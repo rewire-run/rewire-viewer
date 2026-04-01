@@ -39,3 +39,30 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --all-features
+
+  build-wasm:
+    name: build-wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install wasm-bindgen
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@0.2.108
+      - name: Install LLVM tools
+        run: sudo apt-get update && sudo apt-get install -y llvm clang
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: wasm32
+      - name: Build WASM
+        env:
+          AR_wasm32_unknown_unknown: llvm-ar
+          CC_wasm32_unknown_unknown: clang
+        run: cargo build --lib --target wasm32-unknown-unknown --no-default-features
+      - name: Generate JS bindings
+        run: |
+          wasm-bindgen target/wasm32-unknown-unknown/debug/rewire_viewer.wasm \
+            --target web --out-dir web/
