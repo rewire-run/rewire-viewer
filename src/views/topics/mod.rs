@@ -122,8 +122,8 @@ impl ViewClass for TopicsView {
         match state.sort_column {
             SortColumn::Topic => sorted.sort_by(|a, b| a.topic_name.cmp(&b.topic_name)),
             SortColumn::Type => sorted.sort_by(|a, b| a.type_name.cmp(&b.type_name)),
-            SortColumn::Pubs => sorted.sort_by(|a, b| a.publishers.cmp(&b.publishers)),
-            SortColumn::Subs => sorted.sort_by(|a, b| a.subscribers.cmp(&b.subscribers)),
+            SortColumn::Pubs => sorted.sort_by_key(|a| a.publishers),
+            SortColumn::Subs => sorted.sort_by_key(|a| a.subscribers),
         }
         if !state.ascending {
             sorted.reverse();
