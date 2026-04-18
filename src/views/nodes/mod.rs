@@ -121,8 +121,8 @@ impl ViewClass for NodesView {
         let mut sorted: Vec<&system::NodeEntry> = nodes.entries.iter().collect();
         match state.sort_column {
             SortColumn::Node => sorted.sort_by(|a, b| a.node_name.cmp(&b.node_name)),
-            SortColumn::Pubs => sorted.sort_by(|a, b| a.publishers.cmp(&b.publishers)),
-            SortColumn::Subs => sorted.sort_by(|a, b| a.subscribers.cmp(&b.subscribers)),
+            SortColumn::Pubs => sorted.sort_by_key(|a| a.publishers),
+            SortColumn::Subs => sorted.sort_by_key(|a| a.subscribers),
             SortColumn::Transport => sorted.sort_by(|a, b| a.transport.cmp(&b.transport)),
         }
         if !state.ascending {

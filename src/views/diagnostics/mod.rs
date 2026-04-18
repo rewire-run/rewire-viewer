@@ -130,7 +130,7 @@ impl ViewClass for DiagnosticsView {
                     .partial_cmp(&b.bytes_per_sec)
                     .unwrap_or(std::cmp::Ordering::Equal)
             }),
-            SortColumn::Drops => sorted.sort_by(|a, b| a.drops.cmp(&b.drops)),
+            SortColumn::Drops => sorted.sort_by_key(|a| a.drops),
             SortColumn::Latency => sorted.sort_by(|a, b| {
                 a.latency_ms
                     .partial_cmp(&b.latency_ms)
