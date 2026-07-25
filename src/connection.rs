@@ -13,9 +13,9 @@ use std::time::Duration;
 #[cfg(not(target_arch = "wasm32"))]
 use re_log_channel::{LogReceiver, LogSender, LogSource, SmartMessagePayload};
 #[cfg(not(target_arch = "wasm32"))]
-use rewire_extras::proto::v2::relay_service_client::RelayServiceClient;
+use rewire_extras::proto::v3::relay_service_client::RelayServiceClient;
 #[cfg(not(target_arch = "wasm32"))]
-use rewire_extras::proto::v2::GetHeartbeatsRequest;
+use rewire_extras::proto::v3::GetHeartbeatsRequest;
 #[cfg(not(target_arch = "wasm32"))]
 use rewire_extras::BridgeState;
 
