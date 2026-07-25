@@ -1,5 +1,6 @@
 use clap::Parser;
 use rewire_viewer::connection::RelayLink;
+use rewire_viewer::control::ControlServer;
 use rewire_viewer::{app, views};
 
 /// Rewire viewer based on Rerun API for bridge introspection.
@@ -32,6 +33,7 @@ async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     let uri: re_uri::ProxyUri = RelayLink::normalize(&cli.connect).parse()?;
     re_log::info!("Connecting to {uri}");
     let (link, rx) = RelayLink::open(uri);
+    let (_control_server, control_rx) = ControlServer::spawn();
 
     let mut native_options = re_viewer::native::eframe_options(None);
     native_options.viewport = native_options.viewport.with_app_id("rewire_viewer");
@@ -57,6 +59,7 @@ async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             rerun_app.add_view_class::<views::NodesView>()?;
             rerun_app.add_view_class::<views::DiagnosticsView>()?;
             rerun_app.add_log_receiver(rx);
+            rerun_app.add_log_receiver(control_rx);
             Ok(Box::new(app::RewireApp::new(rerun_app, link)))
         }),
     )?;
