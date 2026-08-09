@@ -91,40 +91,16 @@ jobs:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: rewire-run/actions/setup-rust@v1
         with:
           targets: wasm32-unknown-unknown
+          cache-key: wasm32
 
-      - name: Install wasm-bindgen
-        uses: taiki-e/install-action@v2
+      - uses: rewire-run/actions/build-wasm@v1
         with:
-          tool: wasm-bindgen-cli@0.2.117
-
-      - name: Install LLVM tools
-        run: sudo apt-get update && sudo apt-get install -y llvm clang
-
-      - name: Install binaryen
-        run: |
-          curl -sSL https://github.com/WebAssembly/binaryen/releases/download/version_130/binaryen-version_130-x86_64-linux.tar.gz | tar xz
-          echo "$PWD/binaryen-version_130/bin" >> "$GITHUB_PATH"
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: wasm32
-
-      - name: Build WASM
-        env:
-          AR_wasm32_unknown_unknown: llvm-ar
-          CC_wasm32_unknown_unknown: clang
-        run: cargo build --lib --target wasm32-unknown-unknown --release --no-default-features
-
-      - name: Generate JS bindings
-        run: |
-          wasm-bindgen target/wasm32-unknown-unknown/release/rewire_viewer.wasm \
-            --target web --out-dir web/
-
-      - name: Optimize WASM (wasm-opt -Oz)
-        run: wasm-opt -Oz web/rewire_viewer_bg.wasm -o web/rewire_viewer_bg.wasm
+          crate-name: rewire_viewer
+          profile: release
+          optimize: "true"
 
       - uses: actions/upload-artifact@v7
         with:
