@@ -151,8 +151,9 @@ impl RelayLink {
 
     async fn run(uri: re_uri::ProxyUri, tx: LogSender, state: Arc<Mutex<ConnectionState>>) {
         let mut backoff = BACKOFF_MIN;
+        let runtime = re_async::AsyncRuntimeHandle::new_native(tokio::runtime::Handle::current());
         loop {
-            let inner = re_grpc_client::read::stream(uri.clone());
+            let inner = re_grpc_client::read::stream(&runtime, uri.clone());
             let session_tx = tx.clone();
             let session_state = Arc::clone(&state);
             let outcome = tokio::task::spawn_blocking(move || {

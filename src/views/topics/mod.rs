@@ -12,8 +12,8 @@ use re_log_types::EntityPath;
 use re_sdk_types::ViewClassIdentifier;
 use re_viewer_context::{
     IdentifiedViewSystem as _, SystemExecutionOutput, ViewClass, ViewClassLayoutPriority,
-    ViewClassRegistryError, ViewQuery, ViewSpawnHeuristics, ViewState, ViewStateExt as _,
-    ViewSystemExecutionError, ViewSystemRegistrator, ViewerContext,
+    ViewClassRegistryError, ViewClassUiOutput, ViewQuery, ViewSpawnHeuristics, ViewState,
+    ViewStateExt as _, ViewSystemExecutionError, ViewSystemRegistrator, ViewerContext,
 };
 
 use self::system::{TopicsData, TopicsSystem};
@@ -109,7 +109,7 @@ impl ViewClass for TopicsView {
         state: &mut dyn ViewState,
         _query: &ViewQuery<'_>,
         system_output: SystemExecutionOutput,
-    ) -> Result<(), ViewSystemExecutionError> {
+    ) -> Result<ViewClassUiOutput, ViewSystemExecutionError> {
         let tokens = ui.tokens();
         let state = state.downcast_mut::<TopicsViewState>()?;
         let topics = system_output.visualizer_data::<TopicsData>(TopicsSystem::identifier())?;
@@ -121,7 +121,7 @@ impl ViewClass for TopicsView {
                 ui.add_space(20.0);
                 ui.weak("No topics yet");
             });
-            return Ok(());
+            return Ok(ViewClassUiOutput::default());
         }
 
         let mut sorted: Vec<&system::TopicEntry> = entries.iter().collect();
@@ -209,6 +209,6 @@ impl ViewClass for TopicsView {
             }
         }
 
-        Ok(())
+        Ok(ViewClassUiOutput::default())
     }
 }

@@ -101,6 +101,7 @@ jobs:
           crate-name: rewire_viewer
           profile: release
           optimize: "true"
+          wasm-bindgen-version: 0.2.126
 
       - uses: actions/upload-artifact@v7
         with:
