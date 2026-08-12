@@ -55,3 +55,4 @@ jobs:
       - uses: rewire-run/actions/build-wasm@v1
         with:
           crate-name: rewire_viewer
+          wasm-bindgen-version: 0.2.126
