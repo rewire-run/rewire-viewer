@@ -139,32 +139,6 @@ jobs:
           files: artifacts/*
           generate_release_notes: false
 
-  r2:
-    name: r2-upload
-    needs: [build, release]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: Prepare version file
-        run: echo "${GITHUB_REF_NAME#v}" > viewer-version.txt
-
-      - name: Install wrangler
-        run: npm install -g wrangler
-
-      - name: Upload to R2
-        run: |
-          wrangler r2 object put rewire-releases/viewer-version.txt --file viewer-version.txt --remote
-          for f in artifacts/*.tar.gz; do
-            wrangler r2 object put "rewire-releases/$(basename "$f")" --file "$f" --remote
-          done
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-
   deploy-wasm:
     name: deploy-wasm
     needs: [build-wasm, release]
