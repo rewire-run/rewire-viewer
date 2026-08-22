@@ -1,10 +1,11 @@
 mod diagnostics;
 mod nodes;
+mod table;
 mod topics;
 
 /// SpaceView for per-topic diagnostics (Hz, throughput, drops, latency).
-pub use diagnostics::DiagnosticsView;
+pub type DiagnosticsView = table::TableView<diagnostics::Diagnostics>;
 /// SpaceView listing discovered ROS 2 nodes.
-pub use nodes::NodesView;
+pub type NodesView = table::TableView<nodes::Nodes>;
 /// SpaceView listing discovered ROS 2 topics.
-pub use topics::TopicsView;
+pub type TopicsView = table::TableView<topics::Topics>;

@@ -1,52 +1,30 @@
 mod status_bar;
 
-use egui;
+use re_ui::UiExt as _;
 
 pub use status_bar::StatusBar;
 
 /// Renders a clickable column header with a sort-direction indicator.
 ///
 /// When clicked, sets `clicked` to `col` so the caller can toggle sort state.
-pub fn sortable_header<C: Copy>(
+pub fn sortable_header(
     ui: &mut egui::Ui,
     label: &str,
     is_active: bool,
     ascending: bool,
-    clicked: &mut Option<C>,
-    col: C,
+    clicked: &mut Option<usize>,
+    col: usize,
 ) {
     let text = egui::RichText::new(label).strong();
     let response = ui.add(egui::Label::new(text).sense(egui::Sense::click()));
 
     if is_active {
-        let icon_size = 6.0;
-        let icon_center = egui::pos2(
-            response.rect.right() + 4.0 + icon_size * 0.5,
-            response.rect.center().y,
-        );
-        let half_w = icon_size * 0.5;
-        let half_h = icon_size * 0.35;
-        let color = ui.visuals().text_color();
-
-        let points = if ascending {
-            vec![
-                egui::pos2(icon_center.x - half_w, icon_center.y + half_h),
-                egui::pos2(icon_center.x + half_w, icon_center.y + half_h),
-                egui::pos2(icon_center.x, icon_center.y - half_h),
-            ]
+        let icon = if ascending {
+            &re_ui::icons::ARROW_UP
         } else {
-            vec![
-                egui::pos2(icon_center.x - half_w, icon_center.y - half_h),
-                egui::pos2(icon_center.x + half_w, icon_center.y - half_h),
-                egui::pos2(icon_center.x, icon_center.y + half_h),
-            ]
+            &re_ui::icons::ARROW_DOWN
         };
-
-        ui.painter().add(egui::Shape::convex_polygon(
-            points,
-            color,
-            egui::Stroke::NONE,
-        ));
+        ui.small_icon(icon, None);
     }
 
     if response.hovered() {

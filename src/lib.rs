@@ -13,14 +13,10 @@ pub mod connection;
 /// Loopback viewer-control service for the Rerun MCP.
 #[cfg(not(target_arch = "wasm32"))]
 pub mod control;
-/// Custom view icons for Rewire panels.
-pub mod icons;
 /// Parsing for the viewer's theme preference.
 pub mod theme;
 /// Status bar and shared UI helpers.
 pub mod ui;
-/// Shared utilities for extracting data from Arrow arrays.
-pub mod util;
 /// Custom Rerun SpaceView classes for ROS 2 data.
 pub mod views;
 
