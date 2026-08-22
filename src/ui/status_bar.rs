@@ -1,9 +1,5 @@
 use std::time::Duration;
 
-use egui;
-use re_chunk_store;
-use re_entity_db;
-use re_log_types;
 use rewire_extras::{ROS2NodeInfo, ROS2TopicInfo};
 
 use crate::connection::{ConnectionState, FleetSnapshot};
@@ -31,8 +27,20 @@ impl StatusBar {
             has_db: db.is_some(),
             state,
             fleet,
-            node_count: db.map(node_count).unwrap_or(0),
-            topic_count: db.map(topic_count).unwrap_or(0),
+            node_count: db.map_or(0, |db| {
+                latest_len(
+                    db,
+                    "/rewire/nodes",
+                    ROS2NodeInfo::descriptor_node_name().component,
+                )
+            }),
+            topic_count: db.map_or(0, |db| {
+                latest_len(
+                    db,
+                    "/rewire/topics",
+                    ROS2TopicInfo::descriptor_topic_name().component,
+                )
+            }),
             app_id: db
                 .and_then(|db| db.store_info().map(|i| i.application_id().to_string()))
                 .unwrap_or_default(),
@@ -107,48 +115,20 @@ impl StatusBar {
     }
 }
 
-fn node_count(entity_db: &re_entity_db::EntityDb) -> usize {
-    let timeline = re_log_types::TimelineName::log_time();
-    let query = re_chunk_store::LatestAtQuery::latest(timeline);
-    let path = re_log_types::EntityPath::from("/rewire/nodes");
-    let id = ROS2NodeInfo::descriptor_node_name().component;
-
-    entity_db
-        .storage_engine()
+fn latest_len(
+    db: &re_entity_db::EntityDb,
+    path: &str,
+    id: re_sdk_types::ComponentIdentifier,
+) -> usize {
+    let query = re_chunk_store::LatestAtQuery::latest(re_log_types::TimelineName::log_time());
+    db.storage_engine()
         .cache()
         .latest_at(
             re_chunk_store::ChunkTrackingMode::Ignore,
             &query,
-            &path,
+            &re_log_types::EntityPath::from(path),
             [id],
         )
         .component_batch_raw(id)
-        .map(|arr| {
-            use arrow::array::Array as _;
-            arr.len()
-        })
-        .unwrap_or(0)
-}
-
-fn topic_count(entity_db: &re_entity_db::EntityDb) -> usize {
-    let timeline = re_log_types::TimelineName::log_time();
-    let query = re_chunk_store::LatestAtQuery::latest(timeline);
-    let path = re_log_types::EntityPath::from("/rewire/topics");
-    let id = ROS2TopicInfo::descriptor_topic_name().component;
-
-    entity_db
-        .storage_engine()
-        .cache()
-        .latest_at(
-            re_chunk_store::ChunkTrackingMode::Ignore,
-            &query,
-            &path,
-            [id],
-        )
-        .component_batch_raw(id)
-        .map(|arr| {
-            use arrow::array::Array as _;
-            arr.len()
-        })
-        .unwrap_or(0)
+        .map_or(0, |arr| arrow::array::Array::len(&*arr))
 }

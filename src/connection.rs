@@ -46,12 +46,6 @@ const BACKOFF_MAX: Duration = Duration::from_secs(5);
 #[cfg(not(target_arch = "wasm32"))]
 const POLL_INTERVAL: Duration = Duration::from_secs(1);
 
-#[cfg(not(target_arch = "wasm32"))]
-enum Forward {
-    StreamEnded { delivered: bool },
-    ReceiverClosed,
-}
-
 /// Reconnecting link to a relay, owning the redial loop behind a stable receiver.
 #[cfg(not(target_arch = "wasm32"))]
 pub struct RelayLink {
@@ -162,13 +156,12 @@ impl RelayLink {
             .await;
 
             match outcome {
-                Ok(Forward::StreamEnded { delivered }) => {
-                    if delivered {
-                        backoff = BACKOFF_MIN;
-                        Self::set(&state, ConnectionState::Reconnecting);
-                    }
+                Ok(Some(true)) => {
+                    backoff = BACKOFF_MIN;
+                    Self::set(&state, ConnectionState::Reconnecting);
                 }
-                Ok(Forward::ReceiverClosed) | Err(_) => return,
+                Ok(Some(false)) => {}
+                Ok(None) | Err(_) => return,
             }
 
             tokio::time::sleep(backoff).await;
@@ -176,16 +169,22 @@ impl RelayLink {
         }
     }
 
-    fn forward(inner: &LogReceiver, tx: &LogSender, state: &Mutex<ConnectionState>) -> Forward {
+    /// Pumps one stream into the viewer channel. Returns `Some(delivered)` when the
+    /// stream ends, `None` when the viewer dropped its receiver.
+    fn forward(
+        inner: &LogReceiver,
+        tx: &LogSender,
+        state: &Mutex<ConnectionState>,
+    ) -> Option<bool> {
         let mut delivered = false;
         loop {
             let Ok(msg) = inner.recv() else {
-                return Forward::StreamEnded { delivered };
+                return Some(delivered);
             };
             match msg.payload {
                 SmartMessagePayload::Msg(data) => {
                     if tx.send(data).is_err() {
-                        return Forward::ReceiverClosed;
+                        return None;
                     }
                     if !delivered {
                         delivered = true;
@@ -197,7 +196,7 @@ impl RelayLink {
                     if let Some(err) = err {
                         re_log::debug!("Relay stream ended: {err}");
                     }
-                    return Forward::StreamEnded { delivered };
+                    return Some(delivered);
                 }
             }
         }
@@ -260,7 +259,7 @@ mod tests {
         inner_tx.quit(None).unwrap();
 
         let outcome = RelayLink::forward(&inner_rx, &tx, &state);
-        assert!(matches!(outcome, Forward::StreamEnded { delivered: true }));
+        assert_eq!(outcome, Some(true));
         assert_eq!(*state.lock().unwrap(), ConnectionState::Connected);
         assert!(rx.recv().unwrap().data().is_some());
     }
@@ -276,7 +275,7 @@ mod tests {
             .unwrap();
 
         let outcome = RelayLink::forward(&inner_rx, &tx, &state);
-        assert!(matches!(outcome, Forward::StreamEnded { delivered: false }));
+        assert_eq!(outcome, Some(false));
         assert_eq!(*state.lock().unwrap(), ConnectionState::Connecting);
     }
 
@@ -290,6 +289,6 @@ mod tests {
         inner_tx.send(message()).unwrap();
 
         let outcome = RelayLink::forward(&inner_rx, &tx, &state);
-        assert!(matches!(outcome, Forward::ReceiverClosed));
+        assert_eq!(outcome, None);
     }
 }

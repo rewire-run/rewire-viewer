@@ -116,12 +116,7 @@
           }
         }
 
-        const wasmBytes = new Uint8Array(loaded);
-        let offset = 0;
-        for (const chunk of chunks) {
-          wasmBytes.set(chunk, offset);
-          offset += chunk.length;
-        }
+        const wasmBytes = new Uint8Array(await new Blob(chunks).arrayBuffer());
 
         status.textContent = "Initializing...";
         progressBar.style.width = "100%";

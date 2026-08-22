@@ -3,9 +3,6 @@ use std::rc::Rc;
 
 use wasm_bindgen::prelude::*;
 
-use eframe;
-use re_viewer;
-
 use crate::{app::RewireApp, theme::preference as theme_preference, views};
 
 /// Handle for the WASM viewer, exposed to JavaScript via `wasm-bindgen`.
