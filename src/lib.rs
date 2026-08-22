@@ -1,4 +1,4 @@
-//! A custom [Rerun](https://rerun.io) viewer for ROS 2 visualization, built on Rerun v0.35.
+//! A custom [Rerun](https://rerun.io) viewer for ROS 2 visualization, built on Rerun v0.36.
 //!
 //! Rewire Viewer extends the Rerun native viewer with ROS 2-specific panels (Topics, Nodes,
 //! Diagnostics) and a status bar showing relay connectivity. It is a pure client: it dials a
