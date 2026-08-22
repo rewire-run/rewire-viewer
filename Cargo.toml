@@ -28,7 +28,6 @@ re_entity_db = "0.36"
 re_log = "0.36"
 re_log_types = "0.36"
 re_sdk_types = "0.36"
-re_types_core = "0.36"
 re_ui = "0.36"
 re_viewer = { version = "0.36", default-features = false }
 re_viewer_context = "0.36"
@@ -45,15 +44,12 @@ re_grpc_server = "0.36"
 re_log_channel = "0.36"
 re_memory = "0.36"
 re_uri = "0.36"
-rerun = { version = "0.36", default-features = false, features = [
-  "native_viewer",
-  "sdk",
-] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 eframe = { version = "0.36", default-features = false, features = ["wgpu"] }
 wasm-bindgen = "0.2"
+# Referenced by the `#[wasm_bindgen]` expansion of `async fn`, not by our source.
 wasm-bindgen-futures = "0.4"
 web-time = "1"
 web-sys = { version = "0.3.77", features = [
