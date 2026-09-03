@@ -23,27 +23,30 @@ native = ["rewire-extras/grpc"]
 arrow = "58"
 egui = "0.36"
 egui_extras = "0.36"
-re_chunk_store = "0.36"
-re_entity_db = "0.36"
-re_log = "0.36"
-re_log_types = "0.36"
-re_sdk_types = "0.36"
-re_ui = "0.36"
-re_viewer = { version = "0.36", default-features = false }
-re_viewer_context = "0.36"
-rewire-extras = { git = "https://github.com/rewire-run/extras", tag = "v0.11.0", default-features = false }
+re_chunk_store = "0.37"
+re_entity_db = "0.37"
+# re_viewer takes re_importer with default-features = false and exposes no way to
+# turn the formats back on; depending on it directly unifies them back in.
+re_importer = { version = "0.37", features = ["all"] }
+re_log = "0.37"
+re_log_types = "0.37"
+re_sdk_types = "0.37"
+re_ui = "0.37"
+re_viewer = { version = "0.37", default-features = false }
+re_viewer_context = "0.37"
+rewire-extras = { git = "https://github.com/rewire-run/extras", tag = "v0.12.0", default-features = false }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 clap = { version = "4", features = ["derive"] }
 eframe = "0.36"
 mimalloc = "0.1"
-re_async = "0.36"
-re_crash_handler = "0.36"
-re_grpc_client = "0.36"
-re_grpc_server = "0.36"
-re_log_channel = "0.36"
-re_memory = "0.36"
-re_uri = "0.36"
+re_async = "0.37"
+re_crash_handler = "0.37"
+re_grpc_client = "0.37"
+re_grpc_server = "0.37"
+re_log_channel = "0.37"
+re_memory = "0.37"
+re_uri = "0.37"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
